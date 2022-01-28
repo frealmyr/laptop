@@ -65,4 +65,13 @@
       - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
       - { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
       - { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
+      - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
     become_user: root
+
+  # For possible rebinds, run this command:
+  # cat /usr/share/X11/xkb/rules/base.lst
+  - name: rebind caps_lock as super key
+    community.general.dconf:
+      key: "/org/gnome/desktop/input-sources/xkb-options"
+      value: "['caps:super']"
+      state: present

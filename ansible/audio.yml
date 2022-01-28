@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: reload daemon after installing pipewire
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: disable pulseaudio
+      systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: yes
+        state: stopped
+      with_items:
+        - pulseaudio.service
+        - pulseaudio.socket
+
+    - name: enable pipewire and pulse layer
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      with_items:
+        - pipewire
+        - pipewire-pulse

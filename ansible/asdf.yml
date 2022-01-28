@@ -18,8 +18,8 @@
         marker: '# {mark} ANSIBLE MANAGED BLOCK - asdf'
 
     - name: add asdf plugins
-      shell: $HOME/.asdf/bin/asdf plugin add "{{ item }}"
-      loop:
+      command: $HOME/.asdf/bin/asdf plugin add "{{ item }}"
+      with_items:
         - github-cli
         - helm
         - istioctl
@@ -33,8 +33,8 @@
         - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
 
     - name: install asdf plugins
-      shell: $HOME/.asdf/bin/asdf install "{{ item }}" latest
-      loop:
+      command: $HOME/.asdf/bin/asdf install "{{ item }}" latest
+      with_items:
         - github-cli
         - helm
         - istioctl
@@ -44,11 +44,11 @@
         - yq
 
     - name: install asdf stern plugin
-      shell: $HOME/.asdf/bin/asdf install stern 1.20.0
+      command: $HOME/.asdf/bin/asdf install stern 1.20.0
 
     - name: set global default asdf versions
-      shell: $HOME/.asdf/bin/asdf global "{{ item }}" latest
-      loop:
+      command: $HOME/.asdf/bin/asdf global "{{ item }}" latest
+      with_items:
         - github-cli
         - helm
         - istioctl
@@ -58,4 +58,7 @@
         - yq
 
     - name: set global default asdf stern version
-      shell: $HOME/.asdf/bin/asdf global stern 1.20.0
+      command: $HOME/.asdf/bin/asdf global stern 1.20.0
+
+    - name: reshim stern (fix bug)
+      command: $HOME/.asdf/bin/asdf reshim stern

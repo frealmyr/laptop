@@ -20,6 +20,10 @@ ansible-pull -U https://github.com/frealmyr/ansible.git main.yml
 	- add plugins
 	- install plugins
 	- set global versions
+- Configure audio
+	- disable pulseaudio
+	- enable pipewire
+	- enable pipewire-pulse compability layer
 - Setup GPG
 	- import keys from bitwarden vault
 - Install docker
@@ -31,6 +35,7 @@ ansible-pull -U https://github.com/frealmyr/ansible.git main.yml
 	- set zsh as default shell for user
 	- setup bare git repo in home folder
 	- setup trackpoint/touchpad overrides
+	- blacklist broken touchpad module
 - Configure firefox
 	- create work and home profiles
 	- disable open last profile, gain prompt to choose profile when opening

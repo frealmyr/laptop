@@ -12,6 +12,9 @@
 - name: install asdf and plugins
   import_playbook: ansible/asdf.yml
 
+- name: configure audio
+  import_playbook: ansible/audio.yml
+
 - name: setup GPG
   import_playbook: ansible/gpg.yml
 
