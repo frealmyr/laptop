@@ -2,6 +2,22 @@
 - hosts: localhost
   become: yes
   tasks:
+    - name: add pipewire apt repository
+      ansible.builtin.apt_repository:
+        repo: ppa:pipewire-debian/pipewire-upstream
+        state: present
+
+    - name: install apt packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - flatpak # for pipewire easyeffects
+        - gstreamer1.0-pipewire
+        - libspa-0.2-bluetooth
+        - pipewire
+        - pipewire-audio-client-libraries
+
     - name: reload daemon after installing pipewire
       ansible.builtin.systemd:
         daemon_reload: yes
@@ -12,15 +28,34 @@
         enabled: no
         masked: yes
         state: stopped
+        user: yes
       with_items:
         - pulseaudio.service
         - pulseaudio.socket
+      become_user: fredrick
 
     - name: enable pipewire and pulse layer
       ansible.builtin.systemd:
         name: "{{ item }}"
         enabled: yes
         state: started
+        user: yes
       with_items:
         - pipewire
         - pipewire-pulse
+      become_user: fredrick
+
+    - name: add the flathub flatpak repository
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+      become_user: fredrick
+
+    - name: install easyeffects for pipewire
+      community.general.flatpak:
+        name: com.github.wwmm.easyeffects
+        state: present
+        method: user
+      become_user: fredrick
