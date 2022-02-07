@@ -41,7 +41,6 @@
         - "deb https://packages.cloud.google.com/apt cloud-sdk main"
         - "ppa:linrunner/tlp"
         - "ppa:peek-developers/stable"
-        - "ppa:pipewire-debian/pipewire-upstream"
         - "ppa:yubico/stable"
 
     - name: install apt packages
@@ -68,12 +67,10 @@
         - gnupg-agent
         - google-cloud-sdk
         - gpg
-        - gstreamer1.0-pipewire
         - htop
         - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
         - inxi
         - libpam-fprintd # Fingerprint reader PAM integration
-        - libspa-0.2-bluetooth
         - linux-tools-common
         - linux-tools-generic
         - mc
@@ -81,8 +78,6 @@
         - neofetch
         - pass
         - peek
-        - pipewire
-        - pipewire-audio-client-libraries
         - powertop
         - python3-pip
         - regolith-todo
@@ -134,25 +129,6 @@
           - bitwarden
           - geforcenow-electron
           - newsflash
-
-    ######################
-    ## Flatpak Packages ##
-    ######################
-
-    - name: add the flathub flatpak repository
-      community.general.flatpak_remote:
-        name: flathub
-        state: present
-        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-        method: user
-      become_user: fredrick
-
-    - name: install easyeffects for pipewire
-      community.general.flatpak:
-        name: com.github.wwmm.easyeffects
-        state: present
-        method: user
-      become_user: fredrick
 
     ##################
     ## DEB Packages ##
