@@ -52,6 +52,7 @@
         - apt-transport-https
         - bat
         - beekeeper-studio
+        - build-essential
         - ca-certificates
         - chromium-browser
         - containerd.io
@@ -84,11 +85,11 @@
         - pipewire-audio-client-libraries
         - powertop
         - python3-pip
-        - python3-psutil # Required for ansible dconf
-        - regolith-look-dracula
+        - regolith-todo
         - snapd
         - software-properties-common
         - spotify-client
+        - steam
         - tlp
         - tlp-rdw
         - tmux
@@ -110,13 +111,12 @@
       apt:
         pkg:
         - i3xrocks-battery
-        - i3xrocks-bluetooth
         - i3xrocks-cpu-usage
+        - i3xrocks-media-player
         - i3xrocks-memory
-        - i3xrocks-net-traffic
         - i3xrocks-nm-vpn
         - i3xrocks-temp
-        - i3xrocks-volume
+        - i3xrocks-todo
         - i3xrocks-wifi
 
     - name: clean & remove apt packages
@@ -171,6 +171,7 @@
     ## Binaries ##
     ##############
 
+    # docker-credential-helpers
     - name: check docker-credential-helpers version
       command: /usr/local/bin/docker-credential-pass version
       ignore_errors: yes # First time binary does not exist
@@ -194,3 +195,28 @@
     - name: change perm of "/usr/local/bin/docker-credential-pass", adding "+x"
       file: dest=/usr/local/bin/docker-credential-pass mode=a+x
       when: dch_version is failed
+
+    # ncspot, terminal spotify
+    - name: check ncspot version
+      command: /usr/local/bin/ncspot --version
+      ignore_errors: yes # First time binary does not exist
+      no_log: True # Hide the error log when binary is missing
+      register: ncspot_version
+      changed_when: False # Either ok or failed, where is no changed
+      failed_when: ncspot_version.rc == 1 or "0.9.5" not in ncspot_version.stdout
+
+    - name: download ncspot
+      get_url:
+        url="https://github.com/hrkfdn/ncspot/releases/download/v0.9.5/ncspot-v0.9.5-linux-x86_64.tar.gz"
+        dest="/tmp/ncspot-v0.9.5-linux-x86_64.tar.gz"
+      when: ncspot_version is failed
+
+    - name: extract ncspot into /usr/local/bin
+      ansible.builtin.unarchive:
+        src: /tmp/ncspot-v0.9.5-linux-x86_64.tar.gz
+        dest: /usr/local/bin
+      when: ncspot_version is failed
+
+    - name: change perm of "/usr/local/bin/ncspot", adding "+x"
+      file: dest=/usr/local/bin/ncspot mode=a+x
+      when: ncspot_version is failed
