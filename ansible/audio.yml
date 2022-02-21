@@ -45,18 +45,3 @@
       with_items:
         - pipewire
         - pipewire-pulse
-
-    - name: add the flathub flatpak repository
-      community.general.flatpak_remote:
-        name: flathub
-        state: present
-        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-        method: user
-      become_user: fredrick
-
-    - name: install easyeffects for pipewire
-      community.general.flatpak:
-        name: com.github.wwmm.easyeffects
-        state: present
-        method: user
-      become_user: fredrick

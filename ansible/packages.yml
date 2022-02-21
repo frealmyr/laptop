@@ -11,6 +11,7 @@
         name:
           - i3xrocks-rofication # Replaced with dunst
           - regolith-rofication # Replaced with dunst
+          - snapd # Flatpak is superior
         state: absent
         purge: yes
 
@@ -25,10 +26,9 @@
         url: "{{ item }}"
         state: present
       with_items:
-        - "https://deb.beekeeperstudio.io/beekeeper.key"
         - "https://download.docker.com/linux/ubuntu/gpg"
-        - "https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg"
         - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+        - "https://packages.microsoft.com/keys/microsoft.asc"
 
     - name: add apt repositories
       ansible.builtin.apt_repository:
@@ -36,10 +36,10 @@
         state: present
       with_items:
         - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-        - "deb http://repository.spotify.com stable non-free"
-        - "deb https://deb.beekeeperstudio.io stable main"
         - "deb https://packages.cloud.google.com/apt cloud-sdk main"
+        - "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
         - "ppa:linrunner/tlp"
+        - "ppa:neovim-ppa/stable"
         - "ppa:peek-developers/stable"
         - "ppa:yubico/stable"
 
@@ -48,14 +48,15 @@
         update_cache: yes
         cache_valid_time: 3600
         pkg:
+        - acpi-call
         - apt-transport-https
         - bat
-        - beekeeper-studio
         - build-essential
         - ca-certificates
         - chromium-browser
         - containerd.io
         - curl
+        - code
         - docker-ce
         - docker-ce-cli
         - docker-compose
@@ -76,14 +77,14 @@
         - mc
         - mpv
         - neofetch
+        - neovim
         - pass
         - peek
         - powertop
         - python3-pip
         - regolith-todo
-        - snapd
+        - smartmontools
         - software-properties-common
-        - spotify-client
         - steam
         - tlp
         - tlp-rdw
@@ -119,16 +120,32 @@
         autoclean: yes
         autoremove: yes
 
-    ###################
-    ## Snap Packages ##
-    ###################
+    #############
+    ## FlatPak ##
+    #############
 
-    - name: install snap packages
-      community.general.snap:
-        name:
-          - bitwarden
-          - geforcenow-electron
-          - newsflash
+    - name: add the flathub flatpak repository
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+      become_user: fredrick
+
+    - name: install flatpak packages
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: present
+        method: user
+      become_user: fredrick
+      with_items:
+        - com.discordapp.Discord
+        - com.github.wwmm.easyeffects
+        - com.gitlab.newsflash
+        - com.prusa3d.PrusaSlicer
+        - com.slack.Slack
+        - com.spotify.Client
+        - io.github.hmlendea.geforcenow-electron
 
     ##################
     ## DEB Packages ##
@@ -138,10 +155,10 @@
       apt:
         deb: "{{ item }}"
       with_items:
+        - https://downloads.slack-edge.com/releases/linux/4.23.0/prod/x64/slack-desktop-4.23.0-amd64.deb
+        - https://github.com/charmbracelet/glow/releases/download/v1.4.1/glow_1.4.1_linux_amd64.deb
         - https://github.com/josh-richardson/cadmus/releases/latest/download/cadmus.deb
         - https://go.microsoft.com/fwlink/?LinkID=760868 # vscode
-        - https://downloads.slack-edge.com/releases/linux/4.23.0/prod/x64/slack-desktop-4.23.0-amd64.deb
-        - https://discord.com/api/download?platform=linux&format=deb
 
     ##############
     ## Binaries ##
