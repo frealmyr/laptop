@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Install apt packages.."
-sudo apt-get install -y curl git ansible unzip
+echo "Install ansible and git.."
+sudo pacman -S ansible git
 
 echo "Install ansible collection community.general.."
 ansible-galaxy collection install community.general

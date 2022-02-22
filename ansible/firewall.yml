@@ -2,7 +2,13 @@
 - hosts: localhost
   become: true
   tasks:
-    - name: Enable UFW
+    - name: enable ufw service
+      ansible.builtin.systemd:
+        name: ufw.service
+        enabled: yes
+        masked: no
+
+    - name: enable ufw in deny all by default
       community.general.ufw:
         state: enabled
         policy: deny

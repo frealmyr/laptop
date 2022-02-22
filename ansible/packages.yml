@@ -2,78 +2,39 @@
 - hosts: localhost
   become: yes
   tasks:
-    ##################
-    ## APT Packages ##
-    ##################
+    ############
+    ## Pacman ##
+    ############
 
-    - name: remove packages
-      apt:
-        name:
-          - i3xrocks-rofication # Replaced with dunst
-          - regolith-rofication # Replaced with dunst
-          - snapd # Flatpak is superior
-        state: absent
-        purge: yes
-
-    - name: update & upgrade apt packages
-      apt:
-        upgrade: full
+    - name: update & upgrade packages
+      pacman:
+        upgrade: yes
         update_cache: yes
-        cache_valid_time: 3600
-
-    - name: add apt signing keys
-      ansible.builtin.apt_key:
-        url: "{{ item }}"
+    
+    - name: install packages from official
+      pacman:
+        name: "{{ item }}"
         state: present
       with_items:
-        - "https://download.docker.com/linux/ubuntu/gpg"
-        - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
-        - "https://packages.microsoft.com/keys/microsoft.asc"
-
-    - name: add apt repositories
-      ansible.builtin.apt_repository:
-        repo: "{{ item }}"
-        state: present
-      with_items:
-        - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-        - "deb https://packages.cloud.google.com/apt cloud-sdk main"
-        - "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
-        - "ppa:linrunner/tlp"
-        - "ppa:neovim-ppa/stable"
-        - "ppa:peek-developers/stable"
-        - "ppa:yubico/stable"
-
-    - name: install apt packages
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
-        pkg:
-        - acpi-call
-        - apt-transport-https
+        - acpi_call
         - bat
-        - build-essential
-        - ca-certificates
-        - chromium-browser
-        - containerd.io
+        - chromium
         - curl
-        - code
-        - docker-ce
-        - docker-ce-cli
+        - docker
         - docker-compose
-        - dunst # Popup notifications in regolith
+        - dunst
+        - chrony
+        - linux-firmware
+        - linux-firmware-qlogic
+        - ethtool
         - firefox
         - flatpak
-        - fprintd # Fingerprint reader
-        - git
-        - gnupg-agent
-        - google-cloud-sdk
-        - gpg
+        - fprintd
+        - intel-ucode
+        - intel-media-driver
+        - glow
         - htop
-        - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
-        - inxi
-        - libpam-fprintd # Fingerprint reader PAM integration
-        - linux-tools-common
-        - linux-tools-generic
+        - libreoffice-still
         - mc
         - mpv
         - neofetch
@@ -81,44 +42,29 @@
         - pass
         - peek
         - powertop
-        - python3-pip
-        - regolith-todo
+        - python-pip
         - smartmontools
-        - software-properties-common
-        - steam
+        - sof-firmware
         - tlp
+        - regolith-full
         - tlp-rdw
         - tmux
-        - transmission
-        - ubuntu-restricted-extras
-        - xclip # Pipe to clipboard
-        - xz-utils # Required for ansible extract deb package
+        - transmission-gtk
+        - ufw
+        - xclip
+        - xz
         - yubikey-manager
         - zsh
 
-    - name: install apt with --no-recommends
-      apt:
-        install_recommends: no
-        pkg:
-          - libreoffice-calc
-          - libreoffice-gtk3
-
-    - name: install statusbar indicators
-      apt:
-        pkg:
-        - i3xrocks-battery
-        - i3xrocks-cpu-usage
-        - i3xrocks-media-player
-        - i3xrocks-memory
-        - i3xrocks-nm-vpn
-        - i3xrocks-temp
-        - i3xrocks-todo
-        - i3xrocks-wifi
-
-    - name: clean & remove apt packages
-      apt:
-        autoclean: yes
-        autoremove: yes
+    # - name: install apt packages
+    #   apt:
+    #     update_cache: yes
+    #     cache_valid_time: 3600
+    #     pkg:
+    #     - gnupg-agent
+    #     - gpg
+    #     - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
+    #     - libpam-fprintd # Fingerprint reader PAM integration
 
     #############
     ## FlatPak ##
@@ -145,20 +91,8 @@
         - com.prusa3d.PrusaSlicer
         - com.slack.Slack
         - com.spotify.Client
+        - com.valvesoftware.Steam
         - io.github.hmlendea.geforcenow-electron
-
-    ##################
-    ## DEB Packages ##
-    ##################
-
-    - name: install deb packages
-      apt:
-        deb: "{{ item }}"
-      with_items:
-        - https://downloads.slack-edge.com/releases/linux/4.23.0/prod/x64/slack-desktop-4.23.0-amd64.deb
-        - https://github.com/charmbracelet/glow/releases/download/v1.4.1/glow_1.4.1_linux_amd64.deb
-        - https://github.com/josh-richardson/cadmus/releases/latest/download/cadmus.deb
-        - https://go.microsoft.com/fwlink/?LinkID=760868 # vscode
 
     ##############
     ## Binaries ##

@@ -8,7 +8,7 @@
       git:
         repo: https://github.com/asdf-vm/asdf.git
         dest: "~/.asdf"
-        version: v0.8.1
+        version: v0.9.0
         update: no
 
     - name: add asdf to bashrc
@@ -16,6 +16,9 @@
         path: "~/.bashrc"
         block: ". $HOME/.asdf/asdf.sh"
         marker: '# {mark} ANSIBLE MANAGED BLOCK - asdf'
+
+    - name: source asdf
+      shell: source ~/.bashrc
 
     - name: add asdf plugins
       shell: $HOME/.asdf/bin/asdf plugin add "{{ item }}"

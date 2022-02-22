@@ -68,10 +68,31 @@
       - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
     become_user: root
 
+  - name: enable services
+    ansible.builtin.systemd:
+      name: "{{ item }}"
+      enabled: yes
+      masked: no
+    become_user: root
+    with_items:
+      - chronyd.service
+      - tlp.service
+
+  - name: disable and mask services
+    ansible.builtin.systemd:
+      name: "{{ item }}"
+      enabled: no
+      masked: yes
+    become_user: root
+    with_items:
+      - systemd-rfkill.service
+      - systemd-rfkill.socket
+      - systemd-timesyncd.service
+
   # For possible rebinds, run this command:
   # cat /usr/share/X11/xkb/rules/base.lst
-  - name: rebind caps_lock as super key
-    community.general.dconf:
-      key: "/org/gnome/desktop/input-sources/xkb-options"
-      value: "['caps:super']"
-      state: present
+  # - name: rebind caps_lock as super key
+  #   community.general.dconf:
+  #     key: "/org/gnome/desktop/input-sources/xkb-options"
+  #     value: "['caps:super']"
+  #     state: present
