@@ -18,7 +18,7 @@
         marker: '# {mark} ANSIBLE MANAGED BLOCK - asdf'
 
     - name: add asdf plugins
-      shell: $HOME/.asdf/bin/asdf plugin add "{{ item }}"
+      shell: source ~/.bashrc && $HOME/.asdf/bin/asdf plugin add "{{ item }}"
       args:
         executable: /bin/bash
       with_items:
@@ -35,7 +35,7 @@
         - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
 
     - name: install asdf plugins
-      shell: $HOME/.asdf/bin/asdf install "{{ item }}" latest
+      shell: source ~/.bashrc && $HOME/.asdf/bin/asdf install "{{ item }}" latest
       args:
         executable: /bin/bash
       with_items:
@@ -48,12 +48,12 @@
         - yq
 
     - name: install asdf stern plugin
-      shell: $HOME/.asdf/bin/asdf install stern 1.20.0
+      shell: source ~/.bashrc && $HOME/.asdf/bin/asdf install stern 1.20.0
       args:
         executable: /bin/bash
 
     - name: set global default asdf versions
-      shell: $HOME/.asdf/bin/asdf global "{{ item }}" latest
+      shell: source ~/.bashrc && $HOME/.asdf/bin/asdf global "{{ item }}" latest
       args:
         executable: /bin/bash
       with_items:
@@ -66,11 +66,11 @@
         - yq
 
     - name: set global default asdf stern version
-      shell: $HOME/.asdf/bin/asdf global stern 1.20.0
+      shell: source ~/.bashrc && $HOME/.asdf/bin/asdf global stern 1.20.0
       args:
         executable: /bin/bash
 
     - name: reshim stern (fix bug)
-      shell: $HOME/.asdf/bin/asdf reshim stern
+      shell: source ~/.bashrc && $HOME/.asdf/bin/asdf reshim stern
       args:
         executable: /bin/bash

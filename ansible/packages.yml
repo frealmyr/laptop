@@ -27,8 +27,6 @@
         state: present
       with_items:
         - "https://download.docker.com/linux/ubuntu/gpg"
-        - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
-        - "https://packages.microsoft.com/keys/microsoft.asc"
 
     - name: add apt repositories
       ansible.builtin.apt_repository:
@@ -36,8 +34,6 @@
         state: present
       with_items:
         - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-        - "deb https://packages.cloud.google.com/apt cloud-sdk main"
-        - "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
         - "ppa:linrunner/tlp"
         - "ppa:neovim-ppa/stable"
         - "ppa:peek-developers/stable"
@@ -48,7 +44,7 @@
         update_cache: yes
         cache_valid_time: 3600
         pkg:
-        - acpi-call
+        - acpi-call-dkms
         - apt-transport-https
         - bat
         - build-essential
@@ -56,7 +52,6 @@
         - chromium-browser
         - containerd.io
         - curl
-        - code
         - docker-ce
         - docker-ce-cli
         - docker-compose
@@ -66,14 +61,11 @@
         - fprintd # Fingerprint reader
         - git
         - gnupg-agent
-        - google-cloud-sdk
         - gpg
         - htop
         - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
         - inxi
         - libpam-fprintd # Fingerprint reader PAM integration
-        - linux-tools-common
-        - linux-tools-generic
         - mc
         - mpv
         - neofetch
@@ -82,10 +74,7 @@
         - peek
         - powertop
         - python3-pip
-        - regolith-todo
         - smartmontools
-        - software-properties-common
-        - steam
         - tlp
         - tlp-rdw
         - tmux
@@ -95,6 +84,12 @@
         - xz-utils # Required for ansible extract deb package
         - yubikey-manager
         - zsh
+
+    - name: install apt with --recommends
+      apt:
+        install_recommends: yes
+        pkg:
+          - linux-generic-hwe-20.04
 
     - name: install apt with --no-recommends
       apt:
@@ -110,9 +105,7 @@
         - i3xrocks-cpu-usage
         - i3xrocks-media-player
         - i3xrocks-memory
-        - i3xrocks-nm-vpn
         - i3xrocks-temp
-        - i3xrocks-todo
         - i3xrocks-wifi
 
     - name: clean & remove apt packages
@@ -145,20 +138,9 @@
         - com.prusa3d.PrusaSlicer
         - com.slack.Slack
         - com.spotify.Client
+        - com.valvesoftware.Steam
+        - com.visualstudio.code
         - io.github.hmlendea.geforcenow-electron
-
-    ##################
-    ## DEB Packages ##
-    ##################
-
-    - name: install deb packages
-      apt:
-        deb: "{{ item }}"
-      with_items:
-        - https://downloads.slack-edge.com/releases/linux/4.23.0/prod/x64/slack-desktop-4.23.0-amd64.deb
-        - https://github.com/charmbracelet/glow/releases/download/v1.4.1/glow_1.4.1_linux_amd64.deb
-        - https://github.com/josh-richardson/cadmus/releases/latest/download/cadmus.deb
-        - https://go.microsoft.com/fwlink/?LinkID=760868 # vscode
 
     ##############
     ## Binaries ##
