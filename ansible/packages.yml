@@ -27,6 +27,8 @@
         state: present
       with_items:
         - "https://download.docker.com/linux/ubuntu/gpg"
+        - "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
+        - "https://www.virtualbox.org/download/oracle_vbox.asc"
 
     - name: add apt repositories
       ansible.builtin.apt_repository:
@@ -34,6 +36,7 @@
         state: present
       with_items:
         - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        - "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian focal contrib"
         - "ppa:linrunner/tlp"
         - "ppa:neovim-ppa/stable"
         - "ppa:peek-developers/stable"
@@ -52,6 +55,7 @@
         - chromium-browser
         - containerd.io
         - curl
+        - ddcutil
         - docker-ce
         - docker-ce-cli
         - docker-compose
@@ -59,6 +63,7 @@
         - firefox
         - flatpak
         - fprintd # Fingerprint reader
+        - fzf
         - git
         - gnupg-agent
         - gpg
@@ -73,13 +78,16 @@
         - pass
         - peek
         - powertop
+        - python-is-python3
         - python3-pip
+        - python3-psutil # Required for ansible dconf module
         - smartmontools
         - tlp
         - tlp-rdw
         - tmux
         - transmission
         - ubuntu-restricted-extras
+        - virtualbox
         - xclip # Pipe to clipboard
         - xz-utils # Required for ansible extract deb package
         - yubikey-manager
@@ -97,14 +105,14 @@
         pkg:
           - libreoffice-calc
           - libreoffice-gtk3
+          - libreoffice-writer
+          - steam-devices
 
     - name: install statusbar indicators
       apt:
         pkg:
         - i3xrocks-battery
-        - i3xrocks-cpu-usage
         - i3xrocks-media-player
-        - i3xrocks-memory
         - i3xrocks-temp
         - i3xrocks-wifi
 

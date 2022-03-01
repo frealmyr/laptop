@@ -21,8 +21,8 @@
 - name: install and setup docker
   import_playbook: ansible/docker.yml
 
-- name: apply eyecandy
-  import_playbook: ansible/eyecandy.yml
+#- name: apply eyecandy
+#  import_playbook: ansible/eyecandy.yml
 
 - name: download config files
   import_playbook: ansible/configs.yml

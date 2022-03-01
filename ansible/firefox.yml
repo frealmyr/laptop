@@ -8,7 +8,7 @@
     shell: |
       firefox &
       sleep 3
-      pkill -f firefox
+      pkill -f /usr/bin/firefox
     register: firefox_kill_result
     failed_when:
       - firefox_kill_result.rc == 1 or firefox_kill_result.rc == 2
