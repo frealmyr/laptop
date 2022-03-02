@@ -12,11 +12,17 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - firefox
+        - acpi_call
+        - fprintd
         - glfw-wayland
         - gnome-keyring
         - gnome-terminal
+        - intel-media-driver
+        - intel-ucode
+        - linux-firmware
+        - linux-firmware-qlogic
         - qt5-wayland
+        - sof-firmware
         - sway
         - swaylock
         - waybar

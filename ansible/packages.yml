@@ -6,17 +6,16 @@
     ## Pacman ##
     ############
 
-    - name: update & upgrade packages
-      pacman:
-        upgrade: yes
-        update_cache: yes
+    # - name: update & upgrade packages
+    #   pacman:
+    #     upgrade: yes
+    #     update_cache: yes
 
     - name: install packages from official
       pacman:
         name: "{{ item }}"
         state: present
       with_items:
-        - acpi_call
         - bat
         - chromium
         - curl
@@ -24,14 +23,9 @@
         - docker-compose
         - dunst
         - chrony
-        - linux-firmware
-        - linux-firmware-qlogic
         - ethtool
         - firefox
         - flatpak
-        - fprintd
-        - intel-ucode
-        - intel-media-driver
         - glow
         - htop
         - libreoffice-still
@@ -44,7 +38,6 @@
         - powertop
         - python-pip
         - smartmontools
-        - sof-firmware
         - tlp
         - regolith-full
         - tlp-rdw
