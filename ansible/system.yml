@@ -29,3 +29,5 @@
         - wofi
         - xorg-xlsclients
         - xorg-xwayland
+        - grim
+        - slurp
