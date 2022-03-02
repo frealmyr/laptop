@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: update & upgrade packages
+      pacman:
+        upgrade: yes
+        update_cache: yes
+
+    - name: install packages from official
+      pacman:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - firefox
+        - glfw-wayland
+        - gnome-keyring
+        - gnome-terminal
+        - qt5-wayland
+        - sway
+        - swaylock
+        - waybar
+        - wofi
+        - xorg-xlsclients
+        - xorg-xwayland
