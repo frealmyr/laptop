@@ -20,14 +20,15 @@
         - arandr
         - base
         - base-devel
+        - dex
         - dialog
         - dmenu
         - dunst
         - gnome-keyring
         - i3-gaps
         - i3blocks
-        - i3lock
         - i3status-rust
+        - light-locker
         - lightdm
         - lightdm-gtk-greeter
         - lxappearance
