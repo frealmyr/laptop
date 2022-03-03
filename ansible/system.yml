@@ -35,6 +35,7 @@
         - picom
         - rofi
         - xdg-user-dirs
+        - xdg-utils
         - xorg-apps
         - xorg-server
         - xorg-xinit
