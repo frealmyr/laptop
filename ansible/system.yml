@@ -2,32 +2,117 @@
 - hosts: localhost
   become: yes
   tasks:
-    - name: update & upgrade packages
-      pacman:
-        upgrade: yes
-        update_cache: yes
 
-    - name: install packages from official
+  ##############
+  ## Packages ##
+  ##############
+
+    # - name: update & upgrade packages
+    #   pacman:
+    #     update_cache: yes
+    #     upgrade: yes
+
+    - name: install system packages
       pacman:
         name: "{{ item }}"
         state: present
       with_items:
-        - acpi_call
-        - fprintd
-        - glfw-wayland
+        - base
+        - base-devel
+        - dialog
+        - dmenu
+        - dunst
         - gnome-keyring
+        - i3-gaps
+        - i3blocks
+        - i3lock
+        - i3status
+        - lightdm
+        - lightdm-gtk-greeter
+        - lxappearance
+        - network-manager
+        - network-manager-applet
+        - rofi
+        - xdg-user-dirs
+        - xorg-apps
+        - xorg-server
+        - xorg-xinit
+
+    - name: install user packages
+      pacman:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - firefox
+        - git
         - gnome-terminal
-        - intel-media-driver
-        - intel-ucode
-        - linux-firmware
-        - linux-firmware-qlogic
-        - qt5-wayland
-        - sof-firmware
-        - sway
-        - swaylock
-        - waybar
-        - wofi
-        - xorg-xlsclients
-        - xorg-xwayland
-        - grim
-        - slurp
+        - htop
+        - lshw
+        - neovim
+        - openssh
+        - wget
+        - zsh
+
+    - name: install appearance packages
+      pacman:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - arc-solid-gtk-theme
+        - noto-fonts
+        - papirus-icon-theme
+        - terminus-font
+        - ttf-dejavu
+        - ttf-droid
+        - ttf-freefont
+        - ttf-liberation
+        - ttf-roboto
+        - ttf-ubuntu-font-family
+
+  ##############
+  ## Services ##
+  ##############
+
+    - name: enable system services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: yes
+        masked: no
+      with_items:
+        - lightdm
+        # - tlp
+        # - tlp-sleep
+        # - fstrim.timer
+
+    # - name: disable & mask system services
+    #   ansible.builtin.systemd:
+    #     name: "{{ item }}"
+    #     enabled: no
+    #     masked: yes
+    #   with_items:
+    #     - systemd-rfkill.service
+    #     - systemd-rfkill.socket
+
+  ############
+  ## Groups ##
+  ############
+
+    # - name: add user to video group
+    #   user: name=fredrick
+    #         groups=video
+    #         append=yes
+
+    # - name: install laptop packages
+    #   pacman:
+    #     name: "{{ item }}"
+    #     state: present
+    #   with_items:
+        # - acpi
+        # - acpi_call
+        # - fprintd
+        # - intel-media-driver
+        # - intel-ucode
+        # - linux-firmware
+        # - linux-firmware-qlogic
+        # - sof-firmware
+        # - powertop
