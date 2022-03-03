@@ -26,12 +26,12 @@
         - i3-gaps
         - i3blocks
         - i3lock
-        - i3status
+        - i3status-rust
         - lightdm
         - lightdm-gtk-greeter
         - lxappearance
-        - network-manager
         - network-manager-applet
+        - picom
         - rofi
         - xdg-user-dirs
         - xorg-apps
@@ -50,6 +50,7 @@
         - lshw
         - neovim
         - openssh
+        - thunar
         - wget
         - zsh
 
@@ -58,7 +59,7 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - arc-solid-gtk-theme
+        - arc-gtk-theme
         - noto-fonts
         - papirus-icon-theme
         - terminus-font
