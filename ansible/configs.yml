@@ -1,91 +1,188 @@
 ---
 - hosts: localhost
   become: yes
-  become_user: fredrick
+  vars:
+    bw_gpg_itemid: 04b938f4-0034-4986-bce1-ae23015bab3c # Bitwarden item id for GPG secret
+
 
   tasks:
+    ##############
+    ## Defaults ##
+    ##############
     - name: set zsh as default shell
       shell: chsh -s $(which zsh) fredrick
+
+    ######################
+    ## Systemd services ##
+    ######################
+
+    - name: disable system services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: no
       become_user: root
-
-    - name: delete oh-my-zsh folder
-      ansible.builtin.file:
-        path: ${HOME}/.oh-my-zsh
-        state: absent
-
-    - name: install oh-my-zsh
-      shell: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-    - name: delete zshrc backup
-      ansible.builtin.file:
-        path: ${HOME}/.zshrc.pre-oh-my-zsh
-        state: absent
-
-    - name: install oh-my-zsh plugins
-      shell: |
-        git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${HOME}/.oh-my-zsh/custom/plugins/you-should-use
-        git clone https://github.com/zsh-users/zsh-docker.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-docker
-        git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-        git clone https://github.com/zsh-users/zsh-history-substring-search ${HOME}/.oh-my-zsh/custom/plugins/zsh-history-substring-search
-
-    - name: copy files to zsh
-      copy: src={{ item.src }} dest={{ item.dest }}
       with_items:
-        - { src: './files/zsh/freddy.zsh-theme', dest: '~/.oh-my-zsh/themes/freddy.zsh-theme' }
+        - docker.socket
+        - docker.service
+        - containerd.service
 
-    - name: add dotfiles to bashrc
-      blockinfile:
-        path: "~/.bashrc"
-        block: "alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'"
-        marker: '# {mark} ANSIBLE MANAGED BLOCK - dotfiles'
-
-    - name: git ignore .dotfiles/ in homefolder
-      ansible.builtin.lineinfile:
-        path: $HOME/.gitignore
-        line: .dotfiles/
-        create: yes
-
-    - name: clone dotfiles as a bare repo to homefolder
-      ansible.builtin.git:
-        repo: https://github.com/frealmyr/dotfiles.git
-        dest: $HOME/.dotfiles/
-        bare: yes
-
-    - name: checkout and configure dotfiles
-      shell: |
-        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout
-        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME reset --hard
-        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME pull
-        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME config status.showUntrackedFiles no
-
+    ############
+    ## Laptop ##
+    ############
     - name: copy thinkpad x1 carbon gen9 configs
       copy: src={{ item.src }} dest={{ item.dest }}
       with_items:
         - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
-        - { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
         - { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
         - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
-      become_user: root
+        - { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
 
-    # For possible rebinds, run this command:
-    # cat /usr/share/X11/xkb/rules/base.lst
-    - name: rebind caps_lock as super key
-      community.general.dconf:
-        key: "/org/gnome/desktop/input-sources/xkb-options"
-        value: "['caps:super']"
-        state: present
-
+    #############
+    ## Flatpak ##
+    #############
     - name: flatpak > create ~/.themes directory
       file:
         path: ~/.themes
         state: directory
+      become_user: fredrick
 
     - name: flatpak > copy Dracula GTK theme to home folder # System folder is blacklisted in Flatpak
       shell: cp -r /usr/share/themes/Dracula ~/.themes
+      become_user: fredrick
 
     - name: flatpak > allow themes folder in home
       command: sudo flatpak override --filesystem=$HOME/.themes
+      become_user: fredrick
 
     - name: flatpak > set dracula as default theme
       command: sudo flatpak override --env=GTK_THEME=Dracula
+      become_user: fredrick
+
+    #########
+    ## GPG ##
+    #########
+
+    # Fetch from bitwarden
+    - name: Check if Bitwarden vault is unlocked
+      command: bw status
+      register: bw_status
+      failed_when: '"unlocked" not in bw_status.stdout'
+      become_user: fredrick
+
+    - name: Get password from Bitwarden
+      command: "bw get password {{ bw_gpg_itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: private.pgp
+      register: gpg_password
+      become_user: fredrick
+
+    - name: Get privatekey from Bitwarden
+      command: "bw get attachment --itemid {{ bw_gpg_itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: private.pgp
+      register: gpg_key_private
+      become_user: fredrick
+
+    - name: Get publickey from Bitwarden
+      command: "bw get attachment --itemid {{ bw_gpg_itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: public.pgp
+      register: gpg_key_public
+      become_user: fredrick
+
+    - name: Get ownertrust from Bitwarden
+      command: "bw get attachment --itemid {{ bw_gpg_itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: ownertrust.txt
+      register: gpg_ownertrust
+      become_user: fredrick
+
+    # Import to GPG
+    - name: import private key
+      args:
+        stdin: "{{ gpg_key_private.stdout }}"
+      command: gpg --passphrase {{ gpg_password.stdout }} --pinentry-mode loopback --import -
+      become_user: fredrick
+
+    - name: import public key
+      args:
+        stdin: "{{ gpg_key_public.stdout }}"
+      command: gpg --import -
+      become_user: fredrick
+    
+    - name: import ownertrust
+      args:
+        stdin: "{{ gpg_ownertrust.stdout }}"
+      command: gpg --import-ownertrust -
+      become_user: fredrick
+
+    ############
+    ## Docker ##
+    ############
+    - name: add user to docker group
+      user: name=fredrick
+            groups=docker
+            append=yes
+
+    - name: Check if Bitwarden vault is unlocked
+      become_user: fredrick
+      command: bw status
+      register: bw_status
+      failed_when: '"unlocked" not in bw_status.stdout'
+
+    - name: Get gpg fingerprint from Bitwarden
+      become_user: fredrick
+      command: "bw get uri {{ bw_gpg_itemid }} --raw"
+      register: gpg_fingerprint
+
+    # WARNING: i dont use pass for anything else, bitwarden rules
+    - name: deleting existing pass configuration
+      ansible.builtin.file:
+        path: ~/.password-store/.gpg-id
+        state: absent
+      become_user: fredrick
+
+    - name: initializing pass with gpg public key
+      command: pass init {{ gpg_fingerprint.stdout }}
+      become_user: fredrick
+
+    - name: enable pass backend in docker credsStore
+      ansible.builtin.lineinfile:
+        path: ~/.docker/config.json
+        line: "{ 'credsStore': 'pass' }"
+        create: yes
+      become_user: fredrick
+
+    ##############
+    ## Firewall ##
+    ##############
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    # - name: Allow ssh, block brute force attempts
+    #   community.general.ufw:
+    #     rule: limit
+    #     port: ssh
+    #     proto: tcp
+
+    # - name: Allow all access to tcp port 80
+    #   community.general.ufw:
+    #     rule: allow
+    #     port: '{{ item }}'
+    #     proto: tcp
+    #   loop:
+    #     - '80'
+    #     - '443'
+
+    # - name: Allow all access from RFC1918 networks to this host
+    #   community.general.ufw:
+    #     rule: allow
+    #     src: '{{ item }}'
+    #   loop:
+    #     - 10.0.0.0/24
+    #     - 172.17.0.0/16
+    #     - 10.244.0.0/16

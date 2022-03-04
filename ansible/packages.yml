@@ -9,9 +9,15 @@
     - name: remove packages
       apt:
         name:
+          - i3xrocks-battery
+          - i3xrocks-cpu-usage
+          - i3xrocks-net-traffic
+          - i3xrocks-temp
           - i3xrocks-rofication # Replaced with dunst
           - regolith-rofication # Replaced with dunst
           - snapd # Flatpak is superior
+          - gnome-software-plugin-snap
+          - gnome-system-monitor
         state: absent
         purge: yes
 
@@ -37,69 +43,83 @@
       with_items:
         - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
         - "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian focal contrib"
+        - "ppa:aslatter/ppa"
         - "ppa:linrunner/tlp"
         - "ppa:neovim-ppa/stable"
         - "ppa:peek-developers/stable"
         - "ppa:yubico/stable"
 
-    - name: install apt packages
+    - name: install system packages
       apt:
         update_cache: yes
         cache_valid_time: 3600
         pkg:
         - acpi-call-dkms
         - apt-transport-https
-        - bat
         - build-essential
         - ca-certificates
-        - chromium-browser
         - containerd.io
-        - curl
         - ddcutil
         - docker-ce
         - docker-ce-cli
-        - docker-compose
         - dunst # Popup notifications in regolith
-        - firefox
-        - flatpak
-        - fprintd # Fingerprint reader
-        - fzf
         - git
         - gnupg-agent
         - gpg
-        - htop
+        - python-is-python3
+        - python3-pip
+        - python3-psutil # Required for ansible dconf module
+        - ubuntu-restricted-extras
+        - xz-utils # Required for ansible extract deb package
+        - zsh
+
+    - name: install system packages (--recommends)
+      apt:
+        install_recommends: yes
+        pkg:
+          - linux-generic-hwe-20.04
+
+    - name: install laptop packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - fprintd # Fingerprint reader
         - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
-        - inxi
+        - intel-microcode
         - libpam-fprintd # Fingerprint reader PAM integration
+        - powertop
+        - smartmontools
+        - tlp
+        - tlp-rdw
+
+    - name: install user packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - alacritty
+        - bat
+        - curl
+        - docker-compose
+        - firefox
+        - flatpak
+        - fzf
+        - htop
+        - inxi
         - mc
         - mpv
         - neofetch
         - neovim
         - pass
         - peek
-        - powertop
-        - python-is-python3
-        - python3-pip
-        - python3-psutil # Required for ansible dconf module
-        - smartmontools
-        - tlp
-        - tlp-rdw
         - tmux
         - transmission
-        - ubuntu-restricted-extras
         - virtualbox
         - xclip # Pipe to clipboard
-        - xz-utils # Required for ansible extract deb package
         - yubikey-manager
-        - zsh
 
-    - name: install apt with --recommends
-      apt:
-        install_recommends: yes
-        pkg:
-          - linux-generic-hwe-20.04
-
-    - name: install apt with --no-recommends
+    - name: install user packages (--no-recommends)
       apt:
         install_recommends: no
         pkg:
@@ -108,18 +128,22 @@
           - libreoffice-writer
           - steam-devices
 
-    - name: install statusbar indicators
+    - name: install appearance packages
       apt:
         pkg:
-        - i3xrocks-battery
-        - i3xrocks-media-player
-        - i3xrocks-temp
-        - i3xrocks-wifi
+          - dracula-gtk
+          - dracula-icon-theme
+          - i3xrocks-battery
+          - i3xrocks-media-player
+          - i3xrocks-temp
+          - i3xrocks-wifi
+          - regolith-look-dracula
+          - fonts-noto
 
     - name: clean & remove apt packages
       apt:
-        autoclean: yes
         autoremove: yes
+        autoclean: yes
 
     #############
     ## FlatPak ##

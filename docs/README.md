@@ -2,7 +2,7 @@
 
 ```bash
 wget -qO- https://raw.githubusercontent.com/frealmyr/dotfiles/main/install-requirements.sh | bash
-bw login --apikey
+bw login
 export BW_SESSION=$(bw unlock --raw)
 ansible-pull -U https://github.com/frealmyr/ansible.git main.yml
 ```

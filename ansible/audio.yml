@@ -12,11 +12,10 @@
         update_cache: yes
         cache_valid_time: 3600
         pkg:
-        - flatpak # for pipewire easyeffects
-        - gstreamer1.0-pipewire
-        - libspa-0.2-bluetooth
-        - pipewire
-        - pipewire-audio-client-libraries
+          - gstreamer1.0-pipewire
+          - libspa-0.2-bluetooth
+          - pipewire
+          - pipewire-audio-client-libraries
 
     - name: reload daemon after installing pipewire
       ansible.builtin.systemd:
