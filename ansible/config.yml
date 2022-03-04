@@ -1,0 +1,178 @@
+---
+- hosts: localhost
+  become: yes
+  become_user: fredrick
+  vars:
+    itemid: 04b938f4-0034-4986-bce1-ae23015bab3c # Bitwarden item id for GPG secret
+
+  tasks:
+    
+    #####################
+    ## System Defaults ##
+    #####################
+    
+    - name: set zsh as default shell
+      command: chsh -s /usr/bin/zsh
+      become_user: root
+
+    ############
+    ## Groups ##
+    ############
+
+    - name: add user to video group
+      user: name=fredrick
+            groups=video
+            append=yes
+      become_user: root
+
+    ######################
+    ## Systemd Services ##
+    ######################
+
+    - name: enable system services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: yes
+        masked: no
+      become_user: root
+      with_items:
+        - lightdm
+        - tlp
+        - fstrim.timer
+
+    - name: disable & mask system services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: yes
+      become_user: root
+      with_items:
+        - systemd-rfkill.service
+        - systemd-rfkill.socket
+
+    ######### 
+    ## GPG ##
+    #########
+
+    # Fetch from bitwarden
+    - name: Check if Bitwarden vault is unlocked
+      command: bw status
+      register: bw_status
+      failed_when: '"unlocked" not in bw_status.stdout'
+
+    - name: Get password from Bitwarden
+      command: "bw get password {{ itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: private.pgp
+      register: gpg_password
+    - name: Get privatekey from Bitwarden
+      command: "bw get attachment --itemid {{ itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: private.pgp
+      register: gpg_key_private
+    - name: Get publickey from Bitwarden
+      command: "bw get attachment --itemid {{ itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: public.pgp
+      register: gpg_key_public
+    - name: Get ownertrust from Bitwarden
+      command: "bw get attachment --itemid {{ itemid }} {{ attachment }} --raw"
+      vars:
+        attachment: ownertrust.txt
+      register: gpg_ownertrust
+
+    # Import to GPG
+    - name: import private key
+      args:
+        stdin: "{{ gpg_key_private.stdout }}"
+      command: gpg --passphrase {{ gpg_password.stdout }} --pinentry-mode loopback --import -
+    - name: import public key
+      args:
+        stdin: "{{ gpg_key_public.stdout }}"
+      command: gpg --import -
+    - name: import ownertrust
+      args:
+        stdin: "{{ gpg_ownertrust.stdout }}"
+      command: gpg --import-ownertrust -
+
+
+    ############
+    ## Docker ##
+    ############
+
+    - name: add user to docker group
+      user: name=fredrick
+            groups=docker
+            append=yes
+      become_user: root
+
+    - name: Check if Bitwarden vault is unlocked
+      become_user: fredrick
+      command: bw status
+      register: bw_status
+      failed_when: '"unlocked" not in bw_status.stdout'
+
+    - name: Get gpg fingerprint from Bitwarden
+      become_user: fredrick
+      command: "bw get uri {{ itemid }} --raw"
+      register: gpg_fingerprint
+
+    # WARNING: i dont use pass for anything else, bitwarden rules
+    - name: deleting existing pass configuration
+      ansible.builtin.file:
+        path: ~/.password-store/.gpg-id
+        state: absent
+      become_user: fredrick
+
+    - name: initializing pass with gpg public key
+      command: pass init {{ gpg_fingerprint.stdout }}
+      become_user: fredrick
+
+    - name: enable pass backend in docker credsStore
+      ansible.builtin.lineinfile:
+        path: ~/.docker/config.json
+        line: "{ 'credsStore': 'pass' }"
+        create: yes
+      become_user: fredrick
+
+    ##################
+    ## UFW Firewall ##
+    ##################
+
+    - name: enable ufw service
+      ansible.builtin.systemd:
+        name: ufw.service
+        enabled: yes
+        masked: no
+      become_user: root
+
+    - name: enable ufw in deny all by default
+      community.general.ufw:
+        state: enabled
+        policy: deny
+      become_user: root
+
+    # - name: Allow ssh, block brute force attempts
+    #   community.general.ufw:
+    #     rule: limit
+    #     port: ssh
+    #     proto: tcp
+
+    # - name: Allow all access to tcp port 80
+    #   community.general.ufw:
+    #     rule: allow
+    #     port: '{{ item }}'
+    #     proto: tcp
+    #   loop:
+    #     - '80'
+    #     - '443'
+
+    # - name: Allow all access from RFC1918 networks to this host
+    #   community.general.ufw:
+    #     rule: allow
+    #     src: '{{ item }}'
+    #   loop:
+    #     - 10.0.0.0/24
+    #     - 172.17.0.0/16
+    #     - 10.244.0.0/16
+

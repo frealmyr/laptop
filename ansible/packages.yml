@@ -2,16 +2,48 @@
 - hosts: localhost
   become: yes
   tasks:
-    ############
-    ## Pacman ##
-    ############
+
+  ##############
+  ## Packages ##
+  ##############
 
     # - name: update & upgrade packages
     #   pacman:
-    #     upgrade: yes
     #     update_cache: yes
+    #     upgrade: yes
 
-    - name: install packages from official
+    - name: install system packages
+      pacman:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - arandr
+        - base
+        - base-devel
+        - dex
+        - dialog
+        - dmenu
+        - dunst
+        - gnome-keyring
+        - i3-gaps
+        - i3blocks
+        - i3status-rust
+        - light-locker
+        - lightdm
+        - lightdm-gtk-greeter
+        - lxappearance
+        - network-manager-applet
+        - picom
+        - rofi
+        - xdg-user-dirs
+        - xdg-utils
+        - xorg-apps
+        - xorg-server
+        - xorg-xinit
+        - ufw
+        - xclip
+
+    - name: install user packages
       pacman:
         name: "{{ item }}"
         state: present
@@ -21,43 +53,64 @@
         - curl
         - docker
         - docker-compose
-        - dunst
-        - chrony
         - ethtool
-        - firefox
         - flatpak
         - glow
-        - htop
         - libreoffice-still
         - mc
         - mpv
         - neofetch
-        - neovim
         - pass
         - peek
-        - powertop
         - python-pip
-        - smartmontools
-        - tlp
-        - regolith-full
-        - tlp-rdw
+        - firefox
         - tmux
         - transmission-gtk
-        - ufw
-        - xclip
+        - git
+        - alacritty
+        - htop
+        - lshw
+        - neovim
+        - openssh
+        - thunar
+        - wget
         - xz
         - yubikey-manager
         - zsh
 
-    # - name: install apt packages
-    #   apt:
-    #     update_cache: yes
-    #     cache_valid_time: 3600
-    #     pkg:
-    #     - gnupg-agent
-    #     - gpg
-    #     - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
-    #     - libpam-fprintd # Fingerprint reader PAM integration
+    - name: install laptop packages
+      pacman:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - acpi
+        - acpi_call
+        - fprintd
+        - intel-media-driver
+        - intel-ucode
+        - linux-firmware
+        - linux-firmware-qlogic
+        - sof-firmware
+        - powertop
+        - tlp
+        - tlp-rdw
+        - smartmontools
+
+    - name: install appearance packages
+      pacman:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - arc-gtk-theme
+        - noto-fonts
+        - papirus-icon-theme
+        - terminus-font
+        - ttf-dejavu
+        - ttf-droid
+        - ttf-freefont
+        - ttf-liberation
+        - ttf-roboto
+        - ttf-ubuntu-font-family
 
     #############
     ## FlatPak ##
@@ -140,3 +193,5 @@
     - name: change perm of "/usr/local/bin/ncspot", adding "+x"
       file: dest=/usr/local/bin/ncspot mode=a+x
       when: ncspot_version is failed
+
+
