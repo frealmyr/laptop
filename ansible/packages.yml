@@ -11,7 +11,6 @@
         name:
           - i3xrocks-battery
           - i3xrocks-cpu-usage
-          - i3xrocks-net-traffic
           - i3xrocks-temp
           - i3xrocks-rofication # Replaced with dunst
           - regolith-rofication # Replaced with dunst
@@ -66,6 +65,7 @@
         - git
         - gnupg-agent
         - gpg
+        - fwupd
         - python-is-python3
         - python3-pip
         - python3-psutil # Required for ansible dconf module
@@ -171,7 +171,7 @@
         - com.slack.Slack
         - com.spotify.Client
         - com.valvesoftware.Steam
-        - com.visualstudio.code
+        - com.vscodium.codium
         - io.github.hmlendea.geforcenow-electron
 
     ##############
