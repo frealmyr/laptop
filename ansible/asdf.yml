@@ -12,12 +12,6 @@
         update: no
         accept_hostkey: yes
 
-    - name: add asdf to bashrc
-      blockinfile:
-        path: "~/.bashrc"
-        block: ". $HOME/.asdf/asdf.sh"
-        marker: '# {mark} ANSIBLE MANAGED BLOCK - asdf'
-
     - name: add asdf plugins
       shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}"
       args:
@@ -30,6 +24,7 @@
         - gcloud
         - direnv
         - krew
+        - kubectl
         - stern
         - terraform-docs
         - terraform
@@ -50,6 +45,7 @@
         - direnv
         - kompose
         - krew
+        - kubectl
         - terraform-docs
         - terraform
         - yq
@@ -70,6 +66,7 @@
         - direnv
         - kompose
         - krew
+        - kubectl
         - terraform
         - gcloud
         - terraform-docs
@@ -84,3 +81,4 @@
       shell: . $HOME/.asdf/asdf.sh && asdf reshim stern
       args:
         executable: /usr/bin/zsh
+
