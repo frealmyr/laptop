@@ -34,6 +34,7 @@
         - "https://download.docker.com/linux/ubuntu/gpg"
         - "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
         - "https://www.virtualbox.org/download/oracle_vbox.asc"
+        - "https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg"
 
     - name: add apt repositories
       ansible.builtin.apt_repository:
@@ -47,6 +48,7 @@
         - "ppa:neovim-ppa/stable"
         - "ppa:peek-developers/stable"
         - "ppa:yubico/stable"
+        - "deb https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs/ vscodium main"
 
     - name: install system packages
       apt:
@@ -100,6 +102,7 @@
         pkg:
         - alacritty
         - bat
+        - codium
         - curl
         - docker-compose
         - firefox
