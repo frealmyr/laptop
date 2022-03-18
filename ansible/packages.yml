@@ -2,10 +2,9 @@
 - hosts: localhost
   become: yes
   tasks:
-
-  ##############
-  ## Packages ##
-  ##############
+    ##############
+    ## Packages ##
+    ##############
 
     # - name: update & upgrade packages
     #   pacman:
@@ -14,103 +13,108 @@
 
     - name: install system packages
       pacman:
-        name: "{{ item }}"
         state: present
-      with_items:
-        - arandr
-        - base
-        - base-devel
-        - dex
-        - dialog
-        - dmenu
-        - dunst
-        - gnome-keyring
-        - i3-gaps
-        - i3blocks
-        - i3status-rust
-        - light-locker
-        - lightdm
-        - lightdm-gtk-greeter
-        - lxappearance
-        - network-manager-applet
-        - picom
-        - rofi
-        - xdg-user-dirs
-        - xdg-utils
-        - xorg-apps
-        - xorg-server
-        - xorg-xinit
-        - ufw
-        - xclip
+        name:
+          - arandr
+          - autorandr
+          - base
+          - base-devel
+          - dex
+          - dialog
+          - dmenu
+          - dunst
+          - gnome-keyring
+          - hsetroot
+          - i3-gaps
+          - i3blocks
+          - i3status-rust
+          - light
+          - light-locker
+          - lightdm
+          - lightdm-gtk-greeter
+          - lxappearance
+          - network-manager-applet
+          - nm-connection-editor
+          - picom
+          - rofi
+          - ufw
+          - unzip
+          - xclip
+          - xdg-user-dirs
+          - xdg-utils
+          - xorg-apps
+          - xorg-server
+          - xorg-xinit
 
     - name: install user packages
       pacman:
-        name: "{{ item }}"
         state: present
-      with_items:
-        - bat
-        - chromium
-        - curl
-        - docker
-        - docker-compose
-        - ethtool
-        - flatpak
-        - glow
-        - libreoffice-still
-        - mc
-        - mpv
-        - neofetch
-        - pass
-        - peek
-        - python-pip
-        - firefox
-        - tmux
-        - transmission-gtk
-        - git
-        - alacritty
-        - htop
-        - lshw
-        - neovim
-        - openssh
-        - thunar
-        - wget
-        - xz
-        - yubikey-manager
-        - zsh
+        name:
+          - alacritty
+          - bat
+          - chromium
+          - code
+          - curl
+          - docker
+          - docker-compose
+          - ethtool
+          - firefox
+          - flatpak
+          - git
+          - glow
+          - htop
+          - libreoffice-still
+          - lshw
+          - mc
+          - mpv
+          - neofetch
+          - neovim
+          - openssh
+          - pass
+          - pavucontrol
+          - peek
+          - python-pip
+          - thunar
+          - tmux
+          - transmission-gtk
+          - wget
+          - xz
+          - yubikey-manager
+          - zsh
 
     - name: install laptop packages
       pacman:
-        name: "{{ item }}"
         state: present
-      with_items:
-        - acpi
-        - acpi_call
-        - fprintd
-        - intel-media-driver
-        - intel-ucode
-        - linux-firmware
-        - linux-firmware-qlogic
-        - sof-firmware
-        - powertop
-        - tlp
-        - tlp-rdw
-        - smartmontools
+        name:
+          - acpi
+          - acpi_call
+          - fprintd
+          - intel-media-driver
+          - intel-ucode
+          - linux-firmware
+          - linux-firmware-qlogic
+          - powertop
+          - smartmontools
+          - sof-firmware
+          - tlp
+          - tlp-rdw
+          - upower
 
     - name: install appearance packages
       pacman:
-        name: "{{ item }}"
         state: present
-      with_items:
-        - arc-gtk-theme
-        - noto-fonts
-        - papirus-icon-theme
-        - terminus-font
-        - ttf-dejavu
-        - ttf-droid
-        - ttf-freefont
-        - ttf-liberation
-        - ttf-roboto
-        - ttf-ubuntu-font-family
+        name:
+          - arc-gtk-theme
+          - noto-fonts
+          - papirus-icon-theme
+          - terminus-font
+          - ttf-dejavu
+          - ttf-droid
+          - ttf-freefont
+          - ttf-jetbrains-mono
+          - ttf-liberation
+          - ttf-roboto
+          - ttf-ubuntu-font-family
 
     #############
     ## FlatPak ##
@@ -193,5 +197,3 @@
     - name: change perm of "/usr/local/bin/ncspot", adding "+x"
       file: dest=/usr/local/bin/ncspot mode=a+x
       when: ncspot_version is failed
-
-

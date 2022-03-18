@@ -4,69 +4,63 @@
   become_user: fredrick
 
   tasks:
-  - name: set zsh as default shell
-    shell: chsh -s $(which zsh) fredrick
-    become_user: root
+    - name: set zsh as default shell
+      shell: chsh -s $(which zsh) fredrick
+      become_user: root
 
-  - name: delete oh-my-zsh folder
-    ansible.builtin.file:
-      path: ${HOME}/.oh-my-zsh
-      state: absent
+    - name: delete oh-my-zsh folder
+      ansible.builtin.file:
+        path: ${HOME}/.oh-my-zsh
+        state: absent
 
-  - name: install oh-my-zsh
-    shell: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    - name: install oh-my-zsh
+      shell: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-  - name: delete zshrc backup
-    ansible.builtin.file:
-      path: ${HOME}/.zshrc.pre-oh-my-zsh
-      state: absent
+    - name: delete zshrc backup
+      ansible.builtin.file:
+        path: ${HOME}/.zshrc.pre-oh-my-zsh
+        state: absent
 
-  - name: install oh-my-zsh plugins
-    shell: |
-      git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${HOME}/.oh-my-zsh/custom/plugins/you-should-use
-      git clone https://github.com/zsh-users/zsh-docker.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-docker
-      git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-      git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-      git clone https://github.com/zsh-users/zsh-history-substring-search ${HOME}/.oh-my-zsh/custom/plugins/zsh-history-substring-search
+    - name: install oh-my-zsh plugins
+      shell: |
+        git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${HOME}/.oh-my-zsh/custom/plugins/you-should-use
+        git clone https://github.com/zsh-users/zsh-docker.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-docker
+        git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+        git clone https://github.com/zsh-users/zsh-history-substring-search ${HOME}/.oh-my-zsh/custom/plugins/zsh-history-substring-search
 
-  - name: copy files to zsh
-    copy: src={{ item.src }} dest={{ item.dest }}
-    with_items:
-      - { src: './files/zsh/freddy.zsh-theme', dest: '~/.oh-my-zsh/themes/freddy.zsh-theme' }
+    - name: copy files to zsh
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - {
+            src: "./files/zsh/freddy.zsh-theme",
+            dest: "~/.oh-my-zsh/themes/freddy.zsh-theme",
+          }
 
-  - name: add dotfiles to bashrc
-    blockinfile:
-      path: "~/.bashrc"
-      block: "alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'"
-      marker: '# {mark} ANSIBLE MANAGED BLOCK - dotfiles'
+    - name: add dotfiles to bashrc
+      blockinfile:
+        path: "~/.bashrc"
+        block: "alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - dotfiles"
 
-  - name: git ignore .dotfiles/ in homefolder
-    ansible.builtin.lineinfile:
-      path: $HOME/.gitignore
-      line: .dotfiles/
-      create: yes
+    - name: git ignore .dotfiles/ in homefolder
+      ansible.builtin.lineinfile:
+        path: $HOME/.gitignore
+        line: .dotfiles/
+        create: yes
 
-  - name: clone dotfiles as a bare repo to homefolder
-    ansible.builtin.git:
-      repo: https://github.com/frealmyr/dotfiles.git
-      dest: $HOME/.dotfiles/
-      bare: yes
+    - name: clone dotfiles as a bare repo to homefolder
+      ansible.builtin.git:
+        repo: https://github.com/frealmyr/dotfiles.git
+        dest: $HOME/.dotfiles/
+        bare: yes
 
-  - name: checkout and configure dotfiles
-    shell: |
-      /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout
-      /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME reset --hard
-      /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME pull
-      /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME config status.showUntrackedFiles no
-
-  - name: copy thinkpad x1 carbon gen9 configs
-    copy: src={{ item.src }} dest={{ item.dest }}
-    with_items:
-      - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
-      - { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
-      - { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
-      - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
-    become_user: root
+    - name: checkout and configure dotfiles
+      shell: |
+        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout
+        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME reset --hard
+        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME pull
+        /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME config status.showUntrackedFiles no
 
   # For possible rebinds, run this command:
   # cat /usr/share/X11/xkb/rules/base.lst

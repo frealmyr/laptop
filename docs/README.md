@@ -1,43 +1,25 @@
-### Provisioning Regolith Linux
+# Ansible
 
+This repository contains Ansible playbooks for configuring all of my machines, by default it points to my current configuration for my Thinkpad X1 Carbon Gen9.
+
+## Fresh install
+
+When i provision a fresh OS install, i run the `main.yml` which will run all playbooks in sequence. Some playbooks requires the galaxy.community plugin, and some requires a logged in Bitwarden session for pulling secrets, such as GPG keys etc.
+
+To install the prerequisites run the `install-requirements.sh` script:
 ```bash
 wget -qO- https://raw.githubusercontent.com/frealmyr/dotfiles/main/install-requirements.sh | bash
+```
+
+Afterwards you can run the following to login bitwarden, and running ansible without cloning this repository:
+```bash
 bw login --apikey
 export BW_SESSION=$(bw unlock --raw)
 ansible-pull -U https://github.com/frealmyr/ansible.git main.yml
 ```
 
-#### Ansible will do the following
+# Post install
 
-- Install packages
-	- apt update & full-upgrade
-	- install apt packages
-	- install snap packages
-	- install deb packages
-	- install binaries to `/usr/local/bin`
-- Install asdf
-	- add entry to bashrc (for scripts)
-	- add plugins
-	- install plugins
-	- set global versions
-- Configure audio
-	- disable pulseaudio
-	- enable pipewire
-	- enable pipewire-pulse compability layer
-- Setup GPG
-	- import keys from bitwarden vault
-- Install docker
-	- setup pass with GPG
-	- use pass for credsStore
-- Apply eyecandy
-	- set regolith theme to dracula
-- Download config files
-	- set zsh as default shell for user
-	- setup bare git repo in home folder
-	- setup trackpoint/touchpad overrides
-	- blacklist broken touchpad module
-- Configure firefox
-	- create work and home profiles
-	- disable open last profile, gain prompt to choose profile when opening
-	- copy user.js (about:settings) and userChrome.css to generated profiles
-- Configure firewall
+After running the `main.yml` playbook on a new machine. I add more functionality to the playbooks and re-run them individually, rather than doing things manually on my machine. With the goal of keeping everything checked in as IaC.
+
+When doing something experimental, i often create a temporary ansible playbook and play around with that until the changes gets merged into one of the checked in playbooks.

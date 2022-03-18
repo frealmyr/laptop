@@ -6,11 +6,10 @@
     itemid: 04b938f4-0034-4986-bce1-ae23015bab3c # Bitwarden item id for GPG secret
 
   tasks:
-    
     #####################
     ## System Defaults ##
     #####################
-    
+
     - name: set zsh as default shell
       command: chsh -s /usr/bin/zsh
       become_user: root
@@ -21,8 +20,41 @@
 
     - name: add user to video group
       user: name=fredrick
-            groups=video
-            append=yes
+        groups=video
+        append=yes
+      become_user: root
+
+    ###########
+    ## Files ##
+    ###########
+    - name: copy thinkpad x1 carbon gen9 configs
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - {
+            src: "./files/libinput/99-custom-x1c.quirks",
+            dest: "/usr/share/libinput/99-custom-x1c.quirks",
+          }
+        - {
+            src: "./files/modprobe.d/blacklist-touchpad.conf",
+            dest: "/etc/modprobe.d/blacklist-touchpad.conf",
+          }
+        - {
+            src: "./files/modprobe.d/i915.conf",
+            dest: "/etc/modprobe.d/i915.conf",
+          }
+        - {
+            src: "./files/systemd/mouse-fix",
+            dest: "/lib/systemd/system-sleep/mouse-fix",
+          }
+        - { src: "./files/tlp/99-x1c.conf", dest: "/etc/tlp.d/99-x1c.conf" }
+        - {
+            src: "./files/udev/99-trackpoint.rules",
+            dest: "/etc/udev/rules.d/99-trackpoint.rules",
+          }
+        - {
+            src: "./files/X11/20-modesetting.conf",
+            dest: "/etc/X11/xorg.conf.d/20-modesetting.conf",
+          }
       become_user: root
 
     ######################
@@ -50,7 +82,7 @@
         - systemd-rfkill.service
         - systemd-rfkill.socket
 
-    ######### 
+    #########
     ## GPG ##
     #########
 
@@ -95,15 +127,14 @@
         stdin: "{{ gpg_ownertrust.stdout }}"
       command: gpg --import-ownertrust -
 
-
     ############
     ## Docker ##
     ############
 
     - name: add user to docker group
       user: name=fredrick
-            groups=docker
-            append=yes
+        groups=docker
+        append=yes
       become_user: root
 
     - name: Check if Bitwarden vault is unlocked
@@ -175,4 +206,3 @@
     #     - 10.0.0.0/24
     #     - 172.17.0.0/16
     #     - 10.244.0.0/16
-

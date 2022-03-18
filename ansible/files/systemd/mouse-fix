@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# mouse bug fix suspend/resume hook
+
+case $1 in
+  post)
+		modprobe -r psmouse
+		modprobe psmouse
+	;;
+esac

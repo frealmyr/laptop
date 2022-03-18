@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    ####################
+    ## Yay AUR Helper ##
+    ####################
+
+    - name: Install Yay AUR Helper
+      shell: |
+        pacman -S --needed git base-devel
+        git clone https://aur.archlinux.org/yay-bin.git
+        cd yay-bin
+        makepkg -si --noconfirm
+      args:
+        chdir: /tmp
+      become_user: fredrick
+
+    - name: Install AUR packages
+      pacman:
+        state: present
+        executable: /usr/bin/yay
+        extra_args: -S --noconfirm
+        name:
+          - mullvad-vpn

@@ -9,20 +9,17 @@
 - name: install packages
   import_playbook: ansible/packages.yml
 
-#- name: install asdf and plugins
-#  import_playbook: ansible/asdf.yml
+- name: install asdf packages
+  import_playbook: ansible/asdf.yml
 
-- name: setup GPG
-  import_playbook: ansible/gpg.yml
+- name: install yay
+  import_playbook: ansible/yay.yml
 
-- name: install and setup docker
-  import_playbook: ansible/docker.yml
+- name: pull dotfiles
+  import_playbook: ansible/dotfiles.yml
 
-- name: download config files
-  import_playbook: ansible/configs.yml
+- name: configure machine
+  import_playbook: ansible/config.yml
 
 - name: configure firefox
   import_playbook: ansible/firefox.yml
-
-- name: configure firewall
-  import_playbook: ansible/firewall.yml
