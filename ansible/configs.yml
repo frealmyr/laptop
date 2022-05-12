@@ -2,8 +2,7 @@
 - hosts: localhost
   become: yes
   vars:
-    bw_gpg_itemid: 04b938f4-0034-4986-bce1-ae23015bab3c # Bitwarden item id for GPG secret
-
+    gpg_pubkey: "7A8CBDC04D43D0DF3116DBB0D79A8F632BA76FC2"
 
   tasks:
     ##############
@@ -27,29 +26,9 @@
         - docker.service
         - containerd.service
 
-    ############
-    ## Laptop ##
-    ############
-    - name: copy thinkpad x1 carbon gen9 configs
-      copy: src={{ item.src }} dest={{ item.dest }}
-      with_items:
-        - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
-        - { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
-        - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
-        - { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
-
     #############
     ## Flatpak ##
     #############
-    - name: flatpak > create ~/.themes directory
-      file:
-        path: ~/.themes
-        state: directory
-      become_user: fredrick
-
-    - name: flatpak > copy Dracula GTK theme to home folder # System folder is blacklisted in Flatpak
-      shell: cp -r /usr/share/themes/Dracula ~/.themes
-      become_user: fredrick
 
     - name: flatpak > allow themes folder in home
       command: sudo flatpak override --filesystem=$HOME/.themes
@@ -57,64 +36,6 @@
 
     - name: flatpak > set dracula as default theme
       command: sudo flatpak override --env=GTK_THEME=Dracula
-      become_user: fredrick
-
-    #########
-    ## GPG ##
-    #########
-
-    # Fetch from bitwarden
-    - name: Check if Bitwarden vault is unlocked
-      command: bw status
-      register: bw_status
-      failed_when: '"unlocked" not in bw_status.stdout'
-      become_user: fredrick
-
-    - name: Get password from Bitwarden
-      command: "bw get password {{ bw_gpg_itemid }} {{ attachment }} --raw"
-      vars:
-        attachment: private.pgp
-      register: gpg_password
-      become_user: fredrick
-
-    - name: Get privatekey from Bitwarden
-      command: "bw get attachment --itemid {{ bw_gpg_itemid }} {{ attachment }} --raw"
-      vars:
-        attachment: private.pgp
-      register: gpg_key_private
-      become_user: fredrick
-
-    - name: Get publickey from Bitwarden
-      command: "bw get attachment --itemid {{ bw_gpg_itemid }} {{ attachment }} --raw"
-      vars:
-        attachment: public.pgp
-      register: gpg_key_public
-      become_user: fredrick
-
-    - name: Get ownertrust from Bitwarden
-      command: "bw get attachment --itemid {{ bw_gpg_itemid }} {{ attachment }} --raw"
-      vars:
-        attachment: ownertrust.txt
-      register: gpg_ownertrust
-      become_user: fredrick
-
-    # Import to GPG
-    - name: import private key
-      args:
-        stdin: "{{ gpg_key_private.stdout }}"
-      command: gpg --passphrase {{ gpg_password.stdout }} --pinentry-mode loopback --import -
-      become_user: fredrick
-
-    - name: import public key
-      args:
-        stdin: "{{ gpg_key_public.stdout }}"
-      command: gpg --import -
-      become_user: fredrick
-    
-    - name: import ownertrust
-      args:
-        stdin: "{{ gpg_ownertrust.stdout }}"
-      command: gpg --import-ownertrust -
       become_user: fredrick
 
     ############
@@ -125,17 +46,6 @@
             groups=docker
             append=yes
 
-    - name: Check if Bitwarden vault is unlocked
-      become_user: fredrick
-      command: bw status
-      register: bw_status
-      failed_when: '"unlocked" not in bw_status.stdout'
-
-    - name: Get gpg fingerprint from Bitwarden
-      become_user: fredrick
-      command: "bw get uri {{ bw_gpg_itemid }} --raw"
-      register: gpg_fingerprint
-
     # WARNING: i dont use pass for anything else, bitwarden rules
     - name: deleting existing pass configuration
       ansible.builtin.file:
@@ -144,7 +54,7 @@
       become_user: fredrick
 
     - name: initializing pass with gpg public key
-      command: pass init {{ gpg_fingerprint.stdout }}
+      command: pass init {{ gpg_pubkey }}
       become_user: fredrick
 
     - name: enable pass backend in docker credsStore

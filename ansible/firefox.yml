@@ -4,15 +4,6 @@
   become_user: fredrick
 
   tasks:
-  - name: open and kill firefox to generate profiles
-    shell: |
-      firefox &
-      sleep 3
-      pkill -f /usr/bin/firefox
-    register: firefox_kill_result
-    failed_when:
-      - firefox_kill_result.rc == 1 or firefox_kill_result.rc == 2
-
   - name: Wait until profiles.ini is present before continuing
     wait_for:
       path: ~/.mozilla/firefox/profiles.ini

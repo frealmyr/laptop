@@ -12,9 +12,6 @@
 - name: configure system
   import_playbook: ansible/configs.yml
 
-- name: configure audio
-  import_playbook: ansible/audio.yml
-
 - name: setup asdf
   import_playbook: ansible/asdf.yml
 
