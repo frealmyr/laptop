@@ -1,0 +1,103 @@
+---
+- hosts: localhost
+  become: true
+  become_user: fredrick
+
+  tasks:
+    #################################
+    ## Remove Existing Keybindings ##
+    #################################
+    # - name: dconf - dump org.gnome.desktop.wm.keybindings
+    #   shell: gsettings list-recursively | fgrep org.gnome.desktop.wm.keybindings | awk '{print $2}'
+    #   register: existing_keybindings_1
+
+    # - name: dconf - remove all keybindings in org.gnome.desktop.wm.keybindings
+    #   community.general.dconf:
+    #     key: "/org/gnome/desktop/wm/keybindings/{{ item }}"
+    #     value: "['']"
+    #     state: present
+    #   with_items: "{{ existing_keybindings_1.stdout_lines }}"
+
+    # - name: dconf - dump org.gnome.shell.keybindings
+    #   shell: gsettings list-recursively | fgrep org.gnome.shell.keybindings | awk '{print $2}'
+    #   register: existing_keybindings_2
+
+    # - name: dconf - remove all keybindings in org.gnome.shell.keybindings
+    #   community.general.dconf:
+    #     key: "/org/gnome/shell/keybindings/{{ item }}"
+    #     value: "['']"
+    #     state: present
+    #   with_items: "{{ existing_keybindings_2.stdout_lines }}"
+
+    # - name: dconf - dump org.freedesktop.ibus.general.hotkey
+    #   shell: gsettings list-recursively | fgrep org.freedesktop.ibus.general.hotkey | awk '{print $2}'
+    #   register: existing_keybindings_3
+
+    # - name: dconf - remove all keybindings in org.freedesktop.ibus.general.hotkey
+    #   community.general.dconf:
+    #     key: "/org/freedesktop/ibus/general/hotkey/{{ item }}"
+    #     value: "['']"
+    #     state: present
+    #   with_items: "{{ existing_keybindings_3.stdout_lines }}"
+
+    # - name: dconf - dump org.gnome.mutter.keybindings
+    #   shell: gsettings list-recursively | fgrep org.gnome.mutter.keybindings | awk '{print $2}'
+    #   register: existing_keybindings_4
+
+    # - name: dconf - remove all keybindings in org.gnome.mutter.keybindings
+    #   community.general.dconf:
+    #     key: "/org/gnome/mutter/keybindings/{{ item }}"
+    #     value: "['']"
+    #     state: present
+    #   with_items: "{{ existing_keybindings_4.stdout_lines }}"
+
+    # - name: dconf - dump org.gnome.shell.extensions.dash-to-dock
+    #   shell: gsettings list-recursively | fgrep 'org.gnome.shell.extensions.dash-to-dock app-' | awk '{print $2}'
+    #   register: existing_keybindings_5
+
+    # - name: dconf - remove all keybindings in org.gnome.shell.extensions.dash-to-dock
+    #   community.general.dconf:
+    #     key: "/org/gnome/shell/extensions/dash-to-dock/{{ item }}"
+    #     value: "['']"
+    #     state: present
+    #   with_items: "{{ existing_keybindings_5.stdout_lines }}"
+    
+    # - name: dconf - dump org.gnome.mutter.wayland.keybindings
+    #   shell: gsettings list-recursively | fgrep org.gnome.mutter.wayland.keybindings | awk '{print $2}'
+    #   register: existing_keybindings_6
+
+    # - name: dconf - remove all keybindings in org.gnome.mutter.wayland.keybindings
+    #   community.general.dconf:
+    #     key: "/org/gnome/shell/extensions/dash-to-dock/{{ item }}"
+    #     value: "['']"
+    #     state: present
+    #   with_items: "{{ existing_keybindings_6.stdout_lines }}"
+
+    - name: dconf - remove specific keybinding entries in dconf
+      community.general.dconf:
+        key: "{{ item }}"
+        value: "['']"
+        state: present
+      with_items:
+        - /org/gnome/mutter/overlay-key
+        - /org/gnome/settings-daemon/plugins/media-keys/magnifier
+        - /org/gnome/settings-daemon/plugins/media-keys/magnifier-zoom-in
+        - /org/gnome/settings-daemon/plugins/media-keys/magnifier-zoom-out
+        - /org/gnome/settings-daemon/plugins/media-keys/screenreader
+        - /org/gnome/settings-daemon/plugins/media-keys/screensaver
+        - /org/gnome/shell/extensions/dash-to-dock/shortcut-text
+        - /org/gnome/shell/extensions/pop-shell/activate-launcher
+
+
+    ########################
+    ## Create Keybindings ##
+    ########################
+
+    - name: dconf - remove specific keybinding entries in dconf
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.shortcut }}"
+        state: present
+      with_items:
+        - path: /org/gnome/shell/extensions/pop-shell/activate-launcher
+          shortcut: "['<Super>space']"

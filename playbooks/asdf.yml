@@ -6,7 +6,7 @@
   tasks:
     - name: clone asdf repository
       git:
-        repo: 'https://github.com/asdf-vm/asdf.git'
+        repo: "https://github.com/asdf-vm/asdf.git"
         dest: "~/.asdf"
         version: v0.9.0
         update: no
@@ -17,6 +17,8 @@
       args:
         executable: /usr/bin/zsh
       with_items:
+        - argo
+        - argo-rollouts
         - github-cli
         - helm
         - istioctl
@@ -38,6 +40,8 @@
       args:
         executable: /usr/bin/zsh
       with_items:
+        - argo
+        - argo-rollouts
         - github-cli
         - helm
         - istioctl
@@ -47,19 +51,17 @@
         - krew
         - kubectl
         - terraform-docs
+        - stern
         - terraform
         - yq
-
-    - name: install asdf stern plugin
-      shell: . $HOME/.asdf/asdf.sh && asdf install stern 1.20.0
-      args:
-        executable: /usr/bin/zsh
 
     - name: set global default asdf versions
       shell: . $HOME/.asdf/asdf.sh && asdf global "{{ item }}" latest
       args:
         executable: /usr/bin/zsh
       with_items:
+        - argo
+        - argo-rollouts
         - github-cli
         - helm
         - istioctl
@@ -71,14 +73,4 @@
         - gcloud
         - terraform-docs
         - yq
-
-    - name: set global default asdf stern version
-      shell: . $HOME/.asdf/asdf.sh && asdf global stern 1.20.0
-      args:
-        executable: /usr/bin/zsh
-
-    - name: reshim stern (fix bug)
-      shell: . $HOME/.asdf/asdf.sh && asdf reshim stern
-      args:
-        executable: /usr/bin/zsh
-
+        - stern

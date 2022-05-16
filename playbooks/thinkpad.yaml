@@ -1,0 +1,40 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: update & upgrade apt packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: add apt repositories
+      ansible.builtin.apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "ppa:linrunner/tlp"
+
+    - name: install laptop packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - fprintd # Fingerprint reader
+        - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
+        - intel-microcode
+        - libpam-fprintd # Fingerprint reader PAM integration
+        - powertop
+        - tlp
+        - tlp-rdw
+
+    # - name: install system packages (--recommends)
+    #   apt:
+    #     install_recommends: yes
+    #     pkg:
+    #       - linux-generic-hwe-22.04
+
+    - name: clean & remove apt packages
+      apt:
+        autoremove: yes
+        autoclean: yes

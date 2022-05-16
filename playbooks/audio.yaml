@@ -16,6 +16,7 @@
           - libspa-0.2-bluetooth
           - pipewire
           - pipewire-audio-client-libraries
+          - pipewire-media-session
 
     - name: reload daemon after installing pipewire
       ansible.builtin.systemd:
@@ -44,3 +45,4 @@
       with_items:
         - pipewire
         - pipewire-pulse
+        - pipewire-media-session

@@ -1,0 +1,199 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: apt - update and upgrade
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: apt - install pre-requsites packages for managing apt
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+
+    - name: apt - add signing keys
+      ansible.builtin.apt_key:
+        url: "{{ item }}"
+        state: present
+      with_items:
+        - "https://download.docker.com/linux/ubuntu/gpg"
+        - "https://packages.microsoft.com/keys/microsoft.asc"
+
+    - name: apt - add repositories
+      ansible.builtin.apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
+        - "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+        - "ppa:aslatter/ppa"
+        - "ppa:peek-developers/stable"
+        - "ppa:yubico/stable"
+
+    - name: apt - remove distro packages which will be replaced by 3rd party packages
+      apt:
+        pkg:
+          - containerd
+          - docker
+          - docker-engine
+          - docker.io
+          - runc
+        state: absent
+
+    - name: apt - install system packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+          - acpi-call-dkms
+          - build-essential
+          - containerd.io
+          - docker-ce
+          - docker-ce-cli
+          - docker-compose-plugin
+          - make
+          - node-typescript
+          - python-is-python3
+          - python3-pip
+          - python3-psutil # Required for ansible dconf module
+          - smartmontools
+          - ubuntu-restricted-extras
+          - xz-utils # Required for ansible extract deb package
+
+    - name: apt - install utility packages
+      apt:
+        pkg:
+          - ddcutil
+          - fwupd
+
+    - name: apt - install user packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+          - alacritty
+          - bat
+          - code
+          - dconf-editor
+          - curl
+          - docker-compose
+          - firefox
+          - flatpak
+          - git
+          - gnome-shell-extension-manager
+          - gnome-shell-extensions
+          - gnome-tweaks
+          - htop
+          - inxi
+          - mc
+          - mpv
+          - pass
+          - peek
+          - tmux
+          - transmission
+          - wget
+          - wl-clipboard
+          - yubikey-manager
+          - zsh
+
+    - name: apt - install user packages (--no-recommends)
+      apt:
+        install_recommends: no
+        pkg:
+          - libreoffice-calc
+          - libreoffice-gtk3
+          - libreoffice-writer
+
+    - name: apt - install system packages (--recommends)
+      apt:
+        install_recommends: yes
+        pkg:
+          - linux-generic-hwe-22.04
+
+    - name: apt - performing post cleanup
+      apt:
+        upgrade: full
+        update_cache: yes
+        autoremove: yes
+        autoclean: yes
+
+    #############
+    ## FlatPak ##
+    #############
+
+    - name: flatpak - add the flathub repository
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+      become_user: fredrick
+
+    - name: flatpak - install packages
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: present
+        method: user
+      become_user: fredrick
+      with_items:
+        - com.discordapp.Discord
+        - com.prusa3d.PrusaSlicer
+        - com.slack.Slack
+        - com.spotify.Client
+        - org.chromium.Chromium
+
+    ##############
+    ## Binaries ##
+    ##############
+
+    # docker-credential-helpers
+    - name: binaries - check docker-credential-helpers version
+      command: /usr/local/bin/docker-credential-pass version
+      ignore_errors: yes # First time binary does not exist
+      no_log: True # Hide the error log when binary is missing
+      register: dch_version
+      changed_when: False # Either ok or failed, where is no changed
+      failed_when: dch_version.rc == 1 or "0.6.4" not in dch_version.stdout
+
+    - name: binaries - download docker-credential-helpers
+      get_url:
+        url="https://github.com/docker/docker-credential-helpers/releases/download/v0.6.4/docker-credential-secretservice-v0.6.4-amd64.tar.gz"
+        dest="/tmp/docker-credential-secretservice-v0.6.4-amd64.tar.gz"
+      when: dch_version is failed
+
+    - name: binaries - extract docker-credential-secretservice into /usr/local/bin
+      ansible.builtin.unarchive:
+        src: /tmp/docker-credential-secretservice-v0.6.4-amd64.tar.gz
+        dest: /usr/local/bin
+      when: dch_version is failed
+
+    - name: binaries - change perm of "/usr/local/bin/docker-credential-secretservice", adding "+x"
+      file: dest=/usr/local/bin/docker-credential-secretservice mode=a+x
+      when: dch_version is failed
+    
+    #############
+    ## Compile ##
+    #############
+
+    - name: popshell - clone git repo
+      ansible.builtin.git:
+        repo: 'https://github.com/pop-os/shell.git'
+        dest: ~/.local/repos/popshell
+      become_user: fredrick
+    
+    - name: popshell - accept install
+      ansible.builtin.file:
+        path: ~/.local/repos/popshell/.confirm_shortcut_change
+        state: touch
+
+    - name: popshell - compile, install and reload
+      make:
+        chdir: ~/.local/repos/popshell
+        target: local-install
+      become_user: fredrick

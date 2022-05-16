@@ -1,0 +1,100 @@
+
+---
+- hosts: localhost
+  become: true
+
+  tasks:
+    - name: shell - use zsh as default shell
+      shell: chsh -s $(which zsh) fredrick
+
+    ############
+    ## Themes ##
+    ############
+
+    - name: theme - download dracula gnome gtk theme
+      ansible.builtin.git:
+        repo: 'https://github.com/dracula/gtk.git'
+        dest: /usr/share/themes/dracula
+        version: '42'
+
+    - name: dconf - use dracula as gnome gtk theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/gtk-theme"
+        value: "dracula"
+        state: present
+  
+    - name: dconf - use yaru-purple icon theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/icon-theme"
+        value: "Yaru-purple"
+        state: present
+
+    - name: dconf - use DMZ-white cursor theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/cursor-theme"
+        value: "DMZ-White"
+        state: present
+
+    ######################
+    ## Gnome Extensions ##
+    ######################
+
+    # - name: enable extensions
+    #   dconf:
+    #     key: "/org/gnome/shell/enabled-extensions"
+    #     value: "['windowoverlay-icons@sustmidown.centrum.cz', 'emoji-selector@maestroschan.fr']"
+
+    ############
+    ## Docker ##
+    ############
+
+    - name: docker - add user to docker group
+      user: name=fredrick
+            groups=docker
+            append=yes
+
+    - name: docker - use d-bus for secret storage
+      copy: src='./files/docker/config.json' dest='~/.docker/config.json'
+      become_user: fredrick
+
+    - name: docker - disable services on boot (power savings)
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: no
+      become_user: root
+      with_items:
+        - docker.socket
+        - docker.service
+        - containerd.service
+
+    ##############
+    ## Firewall ##
+    ##############
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    # - name: Allow ssh, block brute force attempts
+    #   community.general.ufw:
+    #     rule: limit
+    #     port: ssh
+    #     proto: tcp
+
+    # - name: Allow all access to tcp port 80
+    #   community.general.ufw:
+    #     rule: allow
+    #     port: '{{ item }}'
+    #     proto: tcp
+    #   loop:
+    #     - '80'
+    #     - '443'
+
+    # - name: Allow all access from RFC1918 networks to this host
+    #   community.general.ufw:
+    #     rule: allow
+    #     src: '{{ item }}'
+    #   loop:
+    #     - 10.0.0.0/24

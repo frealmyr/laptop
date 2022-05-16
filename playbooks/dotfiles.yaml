@@ -1,6 +1,6 @@
 ---
 - hosts: localhost
-  become: yes
+  become: true
   become_user: fredrick
 
   tasks:
@@ -48,11 +48,3 @@
         /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME reset --hard
         /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME pull
         /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME config status.showUntrackedFiles no
-
-    # For possible rebinds, run this command:
-    # cat /usr/share/X11/xkb/rules/base.lst
-    # - name: rebind caps_lock as super key
-    #   community.general.dconf:
-    #     key: "/org/gnome/desktop/input-sources/xkb-options"
-    #     value: "['caps:super']"
-    #     state: present
