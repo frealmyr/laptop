@@ -1,22 +1,15 @@
 ---
 - hosts: localhost
-  become: yes
-  ## Ansible is uanble to provision collections/roles before running, requires a seperate ansible-galaxy command..
-  # pre_tasks:
-  #   - name: Get required roles with ansible galaxy
-  #     raw: ansible-galaxy install -r ansible/roles/requirements.yml -p ansible/roles/.tmp
+  become: true
 
-- name: install packages
-  import_playbook: ansible/packages.yml
+- name: playbook - install packages
+  import_playbook: playbooks/packages.yml
 
-- name: configure system
-  import_playbook: ansible/configs.yml
+- name: playbook - configure system
+  import_playbook: playbooks/configure.yml
 
-- name: setup asdf
-  import_playbook: ansible/asdf.yml
+- name: playbook - add dotfiles
+  import_playbook: playbooks/dotfiles.yml
 
-- name: setup dotfiles
-  import_playbook: ansible/dotfiles.yml
-
-- name: configure firefox
-  import_playbook: ansible/firefox.yml
+- name: playbook - add keybindings
+  import_playbook: playbooks/keybindings.yml

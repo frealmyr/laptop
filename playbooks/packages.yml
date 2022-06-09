@@ -1,0 +1,202 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+    ##################
+    ## RPM Packages ##
+    ##################
+
+    - name: dnf - remove packages
+      dnf:
+        name:
+          - rythmbox
+        state: absent
+
+    - name: dnf - upgrade all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: dnf - import RPM keys
+      ansible.builtin.rpm_key:
+        state: present
+        key: "{{ item }}"
+      with_items:
+        - "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020"
+        - "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020"
+        - "https://packages.microsoft.com/keys/microsoft.asc"
+
+    - name: dnf - add RPM Fusion free repository
+      shell: dnf install -y {{ item }}
+      with_items:
+        - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+        - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+
+    - name: dnf - add docker repository
+      shell: dnf config-manager -y --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+    - name: dnf - install docker packages
+      dnf:
+        name:
+          - containerd.io
+          - docker-ce
+          - docker-ce-cli
+          - docker-compose-plugin
+        state: latest
+
+    - name: dnf - install system packages
+      dnf:
+        name:
+          - dconf-editor
+          - ddcutil
+          - fwupd
+          - golang-github-docker-credential-helpers-devel
+          - python3-psutil # Required for ansible dconf module
+          - smartmontools
+          - ufw
+        state: latest
+
+    - name: dnf - install user packages
+      dnf:
+        name:
+          - alacritty
+          - bat
+          - code
+          - curl
+          - docker-compose
+          - gnome-tweaks
+          - htop
+          - inxi
+          - mc
+          - mpv
+          - pass
+          - peek
+          - gpaste
+          - tmux
+          - transmission
+          - wget
+          - wl-clipboard
+          - yubikey-manager
+          - zsh
+          - wofi
+        state: latest
+
+    - name: dnf - install gnome extension packages
+      dnf:
+        name:
+          - gnome-shell-extension-pop-shell
+          - gnome-shell-extension-auto-move-windows
+          - gnome-shell-extension-caffeine
+          - gnome-shell-extension-gpaste
+          - gnome-shell-extension-no-overview
+          - gnome-shell-extension-sound-output-device-chooser
+          - gnome-shell-extension-user-theme
+          - gnome-shell-extension-workspace-indicator
+        state: latest
+
+    #############
+    ## FlatPak ##
+    #############
+
+    - name: add the flathub flatpak repository
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+      become_user: fredrick
+
+    - name: install flatpak packages
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: present
+        method: user
+      become_user: fredrick
+      with_items:
+        - com.discordapp.Discord
+        - com.prusa3d.PrusaSlicer
+        - com.github.tchx84.Flatseal
+        - org.gnome.Extensions
+        - com.jgraph.drawio.desktop
+        - com.slack.Slack
+        - org.chromium.Chromium
+        - com.spotify.Client
+
+    ##########
+    ## asdf ##
+    ##########
+
+    - name: asdf - clone asdf repository
+      git:
+        repo: "https://github.com/asdf-vm/asdf.git"
+        dest: "~/.asdf"
+        version: v0.9.0
+        update: no
+        accept_hostkey: yes
+      become_user: fredrick
+
+    - name: asdf - add plugins
+      shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}"
+      args:
+        executable: /usr/bin/zsh
+      with_items:
+        - argo
+        - argo-rollouts
+        - github-cli
+        - helm
+        - istioctl
+        - kompose
+        - gcloud
+        - direnv
+        - krew
+        - kubectl
+        - stern
+        - terraform-docs
+        - terraform
+        - yq
+      register: asdf_add_result
+      failed_when:
+        - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
+      become_user: fredrick
+
+    - name: asdf - install plugins
+      shell: . $HOME/.asdf/asdf.sh && asdf install "{{ item }}" latest
+      args:
+        executable: /usr/bin/zsh
+      with_items:
+        - argo
+        - argo-rollouts
+        - github-cli
+        - helm
+        - istioctl
+        - gcloud
+        - direnv
+        - kompose
+        - krew
+        - kubectl
+        - terraform-docs
+        - stern
+        - terraform
+        - yq
+      become_user: fredrick
+
+    - name: asdf - set global default versions
+      shell: . $HOME/.asdf/asdf.sh && asdf global "{{ item }}" latest
+      args:
+        executable: /usr/bin/zsh
+      with_items:
+        - argo
+        - argo-rollouts
+        - github-cli
+        - helm
+        - istioctl
+        - direnv
+        - kompose
+        - krew
+        - kubectl
+        - terraform
+        - gcloud
+        - terraform-docs
+        - yq
+        - stern
+      become_user: fredrick

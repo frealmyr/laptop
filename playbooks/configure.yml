@@ -1,0 +1,104 @@
+---
+- hosts: localhost
+  become: true
+
+  tasks:
+    ###########
+    ## Shell ##
+    ###########
+
+    - name: set zsh as default shell
+      shell: chsh -s $(which zsh) fredrick
+
+    ######################
+    ## Gnome Extensions ##
+    ######################
+
+    - name: dconf - enable gnome extensions
+      dconf:
+        key: "/org/gnome/shell/enabled-extensions"
+        value: "['background-logo@fedorahosted.org', 'dash-to-panel@jderose9.github.com', 'hass-gshell@geoph9-on-github', 'sound-output-device-chooser@kgshank.net']"
+      become_user: fredrick
+
+    ########
+    ## UI ##
+    ########
+
+    - name: dconf - disable all animations
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/enable-animations"
+        value: "false"
+        state: present
+      become_user: fredrick
+
+    #
+    ## Themes
+    #
+
+    - name: theme - download dracula gnome gtk theme
+      ansible.builtin.git:
+        repo: "https://github.com/dracula/gtk.git"
+        dest: /usr/share/themes/dracula
+        version: "42"
+
+    - name: dconf - use dracula as gnome gtk theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/gtk-theme"
+        value: "'dracula'"
+        state: present
+      become_user: fredrick
+
+    # - name: dconf - use yaru-purple icon theme
+    #   community.general.dconf:
+    #     key: "/org/gnome/desktop/interface/icon-theme"
+    #     value: "Yaru-purple"
+    #     state: present
+
+    # - name: dconf - use DMZ-white cursor theme
+    #   community.general.dconf:
+    #     key: "/org/gnome/desktop/interface/cursor-theme"
+    #     value: "DMZ-White"
+    #     state: present
+
+    - name: flatpak - allow themes folder in home
+      command: sudo flatpak override --filesystem=$HOME/.themes
+      become_user: fredrick
+
+    - name: flatpak - set dracula as default theme
+      command: sudo flatpak override --env=GTK_THEME=Dracula
+      become_user: fredrick
+
+    ############
+    ## Docker ##
+    ############
+    - name: docker - add user to docker group
+      user: name=fredrick
+        groups=docker
+        append=yes
+
+    - name: docker - use gnome keychain for credsStore
+      ansible.builtin.lineinfile:
+        path: ~/.docker/config.json
+        line: "{ 'credsStore': 'secretservice' }"
+        create: yes
+      become_user: fredrick
+
+    - name: docker - disable system services (for power savings)
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: no
+      become_user: root
+      with_items:
+        - docker.socket
+        - docker.service
+        - containerd.service
+
+    ##############
+    ## Firewall ##
+    ##############
+
+    - name: firewall - enable ufw
+      community.general.ufw:
+        state: enabled
+        policy: deny
