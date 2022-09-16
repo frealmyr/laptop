@@ -24,7 +24,6 @@
       with_items:
         - "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020"
         - "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020"
-        - "https://packages.microsoft.com/keys/microsoft.asc"
 
     - name: dnf - add RPM Fusion free repository
       shell: dnf install -y {{ item }}
@@ -61,38 +60,67 @@
         name:
           - alacritty
           - bat
-          - code
           - curl
           - docker-compose
           - gnome-tweaks
+          - gpaste
           - htop
           - inxi
           - mc
           - mpv
           - pass
           - peek
-          - gpaste
+          - seahorse
           - tmux
           - transmission
           - wget
+          - wireguard-tools
           - wl-clipboard
+          - wofi
+          - yamllint
           - yubikey-manager
           - zsh
-          - wofi
         state: latest
 
     - name: dnf - install gnome extension packages
       dnf:
         name:
-          - gnome-shell-extension-pop-shell
           - gnome-shell-extension-auto-move-windows
           - gnome-shell-extension-caffeine
           - gnome-shell-extension-gpaste
           - gnome-shell-extension-no-overview
+          - gnome-shell-extension-pop-shell
           - gnome-shell-extension-sound-output-device-chooser
           - gnome-shell-extension-user-theme
           - gnome-shell-extension-workspace-indicator
         state: latest
+
+    ###########
+    ## Gnome ##
+    ###########
+
+    # This will create a bunch of popups, no way around this limitation for now.
+    - name: extensions - install extensions
+      shell: |
+        gdbus call --session \
+          --dest org.gnome.Shell.Extensions \
+          --object-path /org/gnome/Shell/Extensions \
+          --method org.gnome.Shell.Extensions.InstallRemoteExtension \
+          "{{ item }}"
+      with_items:
+        - dash-to-panel@jderose9.github.com
+        - launch-new-instance@gnome-shell-extensions.gcampax.github.com
+        - notification-banner-reloaded@marcinjakubowski.github.com
+        - places-menu@gnome-shell-extensions.gcampax.github.com
+        - weeks-start-on-monday@extensions.gnome-shell.fifi.org
+        - wireguard-indicator@atareao.es
+      become_user: fredrick
+
+    # - name: dconf - enable gnome extensions
+    #   dconf:
+    #     key: "/org/gnome/shell/enabled-extensions"
+    #     value: "['background-logo@fedorahosted.org', 'dash-to-panel@jderose9.github.com', 'hass-gshell@geoph9-on-github', 'sound-output-device-chooser@kgshank.net']"
+    #   become_user: fredrick
 
     #############
     ## FlatPak ##
@@ -114,13 +142,19 @@
       become_user: fredrick
       with_items:
         - com.discordapp.Discord
-        - com.prusa3d.PrusaSlicer
         - com.github.tchx84.Flatseal
-        - org.gnome.Extensions
+        - com.gitlab.newsflash
         - com.jgraph.drawio.desktop
+        - com.prusa3d.PrusaSlicer
         - com.slack.Slack
+        - com.visualstudio.code
+        - nl.hjdskes.gcolor3
         - org.chromium.Chromium
-        - com.spotify.Client
+        - org.gnome.BreakTimer
+        - org.gnome.Extensions
+        - org.gnome.gitlab.YaLTeR.VideoTrimmer
+        - rest.insomnia.Insomnia
+        - sh.cider.Cider
 
     ##########
     ## asdf ##
@@ -130,73 +164,34 @@
       git:
         repo: "https://github.com/asdf-vm/asdf.git"
         dest: "~/.asdf"
-        version: v0.9.0
+        version: v0.10.2
         update: no
         accept_hostkey: yes
       become_user: fredrick
 
-    - name: asdf - add plugins
-      shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}"
+    - name: asdf - add, install and set global versions
+      shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}" && asdf install "{{ item }}" latest && asdf global "{{ item }}" latest
       args:
         executable: /usr/bin/zsh
       with_items:
         - argo
         - argo-rollouts
+        - direnv
+        - gcloud
         - github-cli
+        - golang
         - helm
         - istioctl
         - kompose
-        - gcloud
-        - direnv
         - krew
+        - pulumi
         - kubectl
+        - operator-sdk
         - stern
-        - terraform-docs
         - terraform
+        - terraform-docs
         - yq
       register: asdf_add_result
       failed_when:
         - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
-      become_user: fredrick
-
-    - name: asdf - install plugins
-      shell: . $HOME/.asdf/asdf.sh && asdf install "{{ item }}" latest
-      args:
-        executable: /usr/bin/zsh
-      with_items:
-        - argo
-        - argo-rollouts
-        - github-cli
-        - helm
-        - istioctl
-        - gcloud
-        - direnv
-        - kompose
-        - krew
-        - kubectl
-        - terraform-docs
-        - stern
-        - terraform
-        - yq
-      become_user: fredrick
-
-    - name: asdf - set global default versions
-      shell: . $HOME/.asdf/asdf.sh && asdf global "{{ item }}" latest
-      args:
-        executable: /usr/bin/zsh
-      with_items:
-        - argo
-        - argo-rollouts
-        - github-cli
-        - helm
-        - istioctl
-        - direnv
-        - kompose
-        - krew
-        - kubectl
-        - terraform
-        - gcloud
-        - terraform-docs
-        - yq
-        - stern
       become_user: fredrick

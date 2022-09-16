@@ -10,19 +10,47 @@
     - name: set zsh as default shell
       shell: chsh -s $(which zsh) fredrick
 
-    ######################
-    ## Gnome Extensions ##
-    ######################
+    ###########
+    ## Gnome ##
+    ###########
 
-    - name: dconf - enable gnome extensions
-      dconf:
-        key: "/org/gnome/shell/enabled-extensions"
-        value: "['background-logo@fedorahosted.org', 'dash-to-panel@jderose9.github.com', 'hass-gshell@geoph9-on-github', 'sound-output-device-chooser@kgshank.net']"
-      become_user: fredrick
+    - name: dconf - gnome window manager
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - path: /org/gnome/shell/overrides/dynamic-workspaces
+          value: 0 # False
+        - path: /org/gnome/shell/overrides/workspaces-only-on-primary
+          value: 1 # True
+        - path: /org/gnome/desktop/wm/preferences/num-workspaces
+          value: "6"
+        - path: /org/gnome/mutter/center-new-windows
+          value: 0 # False
+        - path: /org/gnome/mutter/edge-tiling
+          value: 0 # False
 
-    ########
-    ## UI ##
-    ########
+    - name: dconf - popos shell
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - path: /org/gnome/shell/extensions/pop-shell/active-hint
+          value: 1 # True
+        - path: /org/gnome/shell/extensions/pop-shell/hint-color-rgba
+          value: "['rgb(254,91,255)']"
+        - path: /org/gnome/shell/extensions/pop-shell/tile-by-default
+          value: 1 # True
+        - path: /org/gnome/shell/extensions/pop-shell/gap-inner
+          value: "2"
+        - path: /org/gnome/shell/extensions/pop-shell/gap-outer
+          value: "2"
+
+    # ########
+    # ## UI ##
+    # ########
 
     - name: dconf - disable all animations
       community.general.dconf:
@@ -30,10 +58,6 @@
         value: "false"
         state: present
       become_user: fredrick
-
-    #
-    ## Themes
-    #
 
     - name: theme - download dracula gnome gtk theme
       ansible.builtin.git:
@@ -48,18 +72,6 @@
         state: present
       become_user: fredrick
 
-    # - name: dconf - use yaru-purple icon theme
-    #   community.general.dconf:
-    #     key: "/org/gnome/desktop/interface/icon-theme"
-    #     value: "Yaru-purple"
-    #     state: present
-
-    # - name: dconf - use DMZ-white cursor theme
-    #   community.general.dconf:
-    #     key: "/org/gnome/desktop/interface/cursor-theme"
-    #     value: "DMZ-White"
-    #     state: present
-
     - name: flatpak - allow themes folder in home
       command: sudo flatpak override --filesystem=$HOME/.themes
       become_user: fredrick
@@ -68,20 +80,31 @@
       command: sudo flatpak override --env=GTK_THEME=Dracula
       become_user: fredrick
 
-    ############
-    ## Docker ##
-    ############
+    # ############
+    # ## Docker ##
+    # ############
+
     - name: docker - add user to docker group
       user: name=fredrick
         groups=docker
         append=yes
 
+    - name: docker - check if docker config.json exists
+      stat:
+        path: ~/.docker/config.json
+      become_user: fredrick
+      register: dockerfile_exist_result
+
     - name: docker - use gnome keychain for credsStore
       ansible.builtin.lineinfile:
         path: ~/.docker/config.json
-        line: "{ 'credsStore': 'secretservice' }"
+        line: |
+          { 
+            "credsStore": "secretservice" 
+          }
         create: yes
       become_user: fredrick
+      when: not dockerfile_exist_result.stat.exists
 
     - name: docker - disable system services (for power savings)
       ansible.builtin.systemd:
@@ -94,9 +117,9 @@
         - docker.service
         - containerd.service
 
-    ##############
-    ## Firewall ##
-    ##############
+    # ##############
+    # ## Firewall ##
+    # ##############
 
     - name: firewall - enable ufw
       community.general.ufw:

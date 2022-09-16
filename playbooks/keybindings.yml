@@ -7,6 +7,7 @@
     ################################
     # Remove Existing Keybindings ##
     ################################
+
     - name: dconf - dump org.gnome.desktop.wm.keybindings
       shell: gsettings list-recursively | fgrep org.gnome.desktop.wm.keybindings | awk '{print $2}'
       register: existing_keybindings_1
@@ -103,19 +104,100 @@
     ## Create Keybindings ##
     ########################
 
-    # - name: dconf - remove specific keybinding entries in dconf
-    #   community.general.dconf:
-    #     key: "{{ item.path }}"
-    #     value: "{{ item.shortcut }}"
-    #     state: present
-    #   with_items:
-    #     - path: /org/gnome/shell/extensions/pop-shell/activate-launcher
-    #       shortcut: "['<Super>space']"
-
-    # For possible rebinds, run this command:
+    # For listing out possible keys to rebinds, run this command:
     # cat /usr/share/X11/xkb/rules/base.lst
-    # - name: rebind caps_lock as super key
-    #   community.general.dconf:
-    #     key: "/org/gnome/desktop/input-sources/xkb-options"
-    #     value: "['caps:super']"
-    #     state: present
+
+    - name: dconf - modifier key bindings
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - path: /org/gnome/desktop/input-sources/xkb-options
+          value: "['caps:super']"
+
+    - name: dconf - window manager key bindings
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - path: /org/gnome/settings-daemon/plugins/media-keys/search
+          value: "['<Super>space']"
+        - path: /org/gnome/desktop/wm/keybindings/close
+          value: "['<Super>q']"
+        - path: /org/gnome/desktop/wm/keybindings/toggle-fullscreen
+          value: "['<Super>f']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-1
+          value: "['<Super>1']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-2
+          value: "['<Super>2']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-3
+          value: "['<Super>3']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-4
+          value: "['<Super>4']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-5
+          value: "['<Super>5']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-6
+          value: "['<Super>6']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-7
+          value: "['<Super>7']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-8
+          value: "['<Super>8']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-9
+          value: "['<Super>9']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-10
+          value: "['<Super>0']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-11
+          value: "['<Super>minus']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-12
+          value: "['<Super>equal']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-up
+          value: "['<Control><Super>Up']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-left
+          value: "['<Control><Super>Left']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-right
+          value: "['<Control><Super>Right']"
+        - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-down
+          value: "['<Control><Super>Down']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-1
+          value: "['<Shift><Super>exclam']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-2
+          value: "['<Shift><Super>at']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-3
+          value: "['<Shift><Super>numbersign']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-4
+          value: "['<Shift><Super>dollar']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-5
+          value: "['<Shift><Super>percent']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-6
+          value: "['<Shift><Super>asciicircum']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-7
+          value: "['<Shift><Super>ampersand']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-8
+          value: "['<Shift><Super>asterisk']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-9
+          value: "['<Shift><Super>parenleft']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-10
+          value: "['<Shift><Super>parenright']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-11
+          value: "['<Shift><Super>underscore']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-12
+          value: "['<Shift><Super>plus']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-up
+          value: "['<Shift><Super>Up']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-left
+          value: "['<Shift><Super>Left']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-right
+          value: "['<Shift><Super>Right']"
+        - path: /org/gnome/desktop/wm/keybindings/move-to-workspace-down
+          value: "['<Shift><Super>Down']"
+
+    - name: dconf - popos shell
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - path: /org/gnome/shell/extensions/pop-shell/toggle-floating
+          value: "['<Super><Shift>f']"
