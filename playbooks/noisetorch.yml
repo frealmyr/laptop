@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  become: true
+  become_user: fredrick
+
+  tasks:
+#  - name: check docker-credential-helpers version
+#    command: /usr/local/bin/docker-credential-pass version
+#    ignore_errors: yes # First time binary does not exist
+#    no_log: True # Hide the error log when binary is missing
+#    register: dch_version
+#    changed_when: False # Either ok or failed, where is no changed
+#    failed_when: dch_version.rc == 1 or "0.6.4" not in dch_version.stdout
+  - name: misc - get user homedir
+    local_action: command echo ~
+    register: homedir
+
+  - name: noisetorch - download
+    get_url:
+      url="https://github.com/noisetorch/NoiseTorch/releases/download/v0.12.2/NoiseTorch_x64_v0.12.2.tgz"
+      dest="/tmp/NoiseTorch_x64_v0.12.2.tgz"
+#    when: dch_version is failed
+
+  - name: noisetorch - extract to home
+    ansible.builtin.unarchive:
+      src: /tmp/NoiseTorch_x64_v0.12.2.tgz
+      dest: "{{ homedir.stdout }}"
+#    when: dch_version is failed
+
+  - name: noisetorch - set cap_sys_chroot+ep on binary
+    community.general.capabilities:
+      path: "{{ homedir.stdout }}/.local/bin/noisetorch"
+      capability: cap_sys_chroot+ep
+      state: present
+    become_user: root
+#    when: dch_version is failed

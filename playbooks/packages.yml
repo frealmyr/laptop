@@ -1,0 +1,196 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+    ##################
+    ## APT Packages ##
+    ##################
+
+    - name: update & upgrade apt packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: add apt signing keys
+      ansible.builtin.apt_key:
+        url: "{{ item }}"
+        state: present
+      with_items:
+        - "https://download.docker.com/linux/ubuntu/gpg"
+
+    - name: add apt repositories
+      ansible.builtin.apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "ppa:linrunner/tlp"
+        - "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        - "ppa:ansible/ansible"
+
+    - name: install system packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - acpi-call-dkms
+        - apt-transport-https
+        - build-essential
+        - ca-certificates
+        - ddcutil
+        - dunst # Popup notifications in regolith
+        - git
+        - gnupg-agent
+        - gpg
+        - fwupd
+        - python-is-python3
+        - python3-pip
+        - python3-psutil # Required for ansible dconf module
+        - ubuntu-restricted-extras
+        - xz-utils # Required for ansible extract deb package
+        - zsh
+        - ufw
+
+    - name: install docker packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+          - containerd.io
+          - docker-ce
+          - docker-ce-cli
+          - golang-docker-credential-helpers
+          - docker-compose
+
+    - name: install laptop packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - fprintd # Fingerprint reader
+        - intel-media-va-driver-non-free # Intel Gen 8+ VAAPI
+        - intel-microcode
+        - libpam-fprintd # Fingerprint reader PAM integration
+        - powertop
+        - smartmontools
+        - tlp
+        - tlp-rdw
+
+    - name: install user packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - bat
+        - curl
+        - wget
+        - firefox
+        - flatpak
+        - fzf
+        - htop
+        - inxi
+        - mc
+        - mpv
+        - neofetch
+        - tmux
+        - wireguard-tools
+        - yamllint
+        - xclip # Pipe to clipboard
+
+    - name: install user packages (--no-recommends)
+      apt:
+        install_recommends: no
+        pkg:
+          - libreoffice-calc
+          - libreoffice-gtk3
+          - libreoffice-writer
+          - steam-devices
+
+    - name: install appearance packages
+      apt:
+        pkg:
+          - dracula-gtk
+          - dracula-icon-theme
+          - i3xrocks-battery
+          - regolith-look-dracula
+
+    - name: remove and purge packages
+      apt:
+        name:
+          - regolith-rofication
+        state: absent
+
+    - name: clean & remove apt packages
+      apt:
+        autoremove: yes
+        autoclean: yes
+
+    #############
+    ## FlatPak ##
+    #############
+
+    - name: add the flathub flatpak repository
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+      become_user: fredrick
+
+    - name: install flatpak packages
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: present
+        method: user
+      become_user: fredrick
+      with_items:
+        - com.discordapp.Discord
+        - com.github.tchx84.Flatseal
+        - com.prusa3d.PrusaSlicer
+        - com.slack.Slack
+        - com.visualstudio.code
+        - org.chromium.Chromium
+        - rest.insomnia.Insomnia
+        - sh.cider.Cider
+        - com.github.wwmm.easyeffects
+        - com.jgraph.drawio.desktop
+
+    ##########
+    ## asdf ##
+    ##########
+
+    - name: asdf - clone asdf repository
+      git:
+        repo: "https://github.com/asdf-vm/asdf.git"
+        dest: "~/.asdf"
+        version: v0.10.2
+        update: no
+        accept_hostkey: yes
+      become_user: fredrick
+
+    - name: asdf - add, install and set global versions
+      shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}" && asdf install "{{ item }}" latest && asdf global "{{ item }}" latest
+      args:
+        executable: /usr/bin/zsh
+      with_items:
+        - argo
+        - argo-rollouts
+        - direnv
+        - gcloud
+        - github-cli
+        - golang
+        - helm
+        - istioctl
+        - kompose
+        - krew
+        - pulumi
+        - kubectl
+        - operator-sdk
+        - stern
+        - terraform
+        - terraform-docs
+        - yq
+      register: asdf_add_result
+      failed_when:
+        - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
+      become_user: fredrick

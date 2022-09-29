@@ -2,10 +2,18 @@
 - hosts: localhost
   become: yes
   tasks:
-    - name: add pipewire apt repository
-      ansible.builtin.apt_repository:
-        repo: ppa:pipewire-debian/pipewire-upstream
-        state: present
+#    - name: add pipewire apt repository
+#      ansible.builtin.apt_repository:
+#        repo: ppa:pipewire-debian/pipewire-upstream
+#        state: present
+
+    - name: remove packages
+      apt:
+        name:
+          - pipewire-media-session
+          - pulseaudio-module-bluetooth
+        state: absent
+        purge: yes
 
     - name: install apt packages
       apt:
@@ -16,23 +24,17 @@
           - libspa-0.2-bluetooth
           - pipewire
           - pipewire-audio-client-libraries
+          - wireplumber
+          - libfdk-aac2
+          - libldacbt-abr2
+          - libldacbt-enc2
+          - libopenaptx0
 
     - name: reload daemon after installing pipewire
       ansible.builtin.systemd:
         daemon_reload: yes
         scope: user
       become_user: fredrick
-
-    - name: disable pulseaudio
-      systemd:
-        name: "{{ item }}"
-        masked: yes
-        state: stopped
-        scope: user
-      become_user: fredrick
-      with_items:
-        - pulseaudio.service
-        - pulseaudio.socket
 
     - name: enable pipewire and pulse layer
       ansible.builtin.systemd:
@@ -44,3 +46,4 @@
       with_items:
         - pipewire
         - pipewire-pulse
+        - wireplumber.service

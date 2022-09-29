@@ -1,0 +1,79 @@
+---
+- hosts: localhost
+  become: true
+
+  tasks:
+    ##############
+    ## Defaults ##
+    ##############
+    - name: set zsh as default shell
+      shell: chsh -s $(which zsh) fredrick
+
+    ############
+    ## System ##
+    ############
+
+#    - name: copy thinkpad x1 carbon gen9 configs
+#      copy: src={{ item.src }} dest={{ item.dest }}
+#      with_items:
+#        - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
+#        #- { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
+#        #- { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
+#        #- { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
+
+    # grants access to ddcutil commands without sudo, see https://www.ddcutil.com/i2c_permissions/
+    - name: add user to i2c group
+      user: name=fredrick
+        groups=i2c
+        append=yes
+
+    #############
+    ## Flatpak ##
+    #############
+
+    - name: flatpak > create ~/.themes directory
+      file:
+        path: ~/.themes
+        state: directory
+      become_user: fredrick
+
+    - name: flatpak > copy Dracula GTK theme to home folder # System folder is blacklisted in Flatpak
+      shell: cp -r /usr/share/themes/Dracula ~/.themes
+      become_user: fredrick
+
+    - name: flatpak > allow themes folder in home
+      command: sudo flatpak override --filesystem=$HOME/.themes
+      become_user: fredrick
+
+    - name: flatpak > set dracula as default theme
+      command: sudo flatpak override --env=GTK_THEME=Dracula
+      become_user: fredrick
+
+    ############
+    ## Docker ##
+    ############
+
+    - name: disable system services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: no
+      become_user: root
+      with_items:
+        - docker.socket
+        - docker.service
+        - containerd.service
+
+    - name: add user to docker group
+      user: name=fredrick
+            groups=docker
+            append=yes
+
+    ##############
+    ## Firewall ##
+    ##############
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny

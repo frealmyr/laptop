@@ -28,5 +28,5 @@ crash.log
 /roles
 
 # Ansible
-/ansible/roles/.tmp
-/ansible/docker_pass
+/playbooks/roles/.tmp
+/playbooks/docker_pass
