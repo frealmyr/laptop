@@ -2,22 +2,25 @@
 - hosts: localhost
   become: yes
   become_user: fredrick
-
+  vars:
+    profiles:
+      - Personal
+      - Sonat
+      - Entur
   tasks:
-  - name: Wait until profiles.ini is present before continuing
-    wait_for:
-      path: ~/.mozilla/firefox/profiles.ini
-      delay: 3
+  - name: firefox - get all profiles in folder
+    args:
+      chdir: "~/.mozilla/firefox"
+    command: ls -d */ | grep -v "Crash Reports" | grep -v "Pending Pings"
+    register: get_profiles
 
-  - name: find default firefox user id
-    shell: cat "$HOME/.mozilla/firefox/profiles.ini" | sed -n -e 's/^.*Path=//p' | head -n 1 | cut -d "." -f1
-    register: firefox_id
+  - name: firefox - check if profiles are already created
+    args:
+      chdir: "~/.mozilla/firefox"
+    command: ls -d */ | grep -v "Crash Reports" | grep -v "Pending Pings"
+    register: get_profiles
 
-  - name: find default firefox user path
-    shell: cat "$HOME/.mozilla/firefox/profiles.ini" | sed -n -e 's/^.*Path=//p' | head -n 1
-    register: firefox_path
-
-  - name: duplicate default profile folder
+  - name: firefox - create profiles
     args:
       chdir: "~/.mozilla/firefox"
     command: cp -r {{ firefox_path.stdout }}/ {{ firefox_id.stdout }}.{{ item }}
@@ -42,7 +45,7 @@
       path: ~/.mozilla/firefox/profiles.ini
       regexp: 'Name=default-release$'
       line: Name=home
-
+ 
   - name: replace profile default-release path with home
     lineinfile:
       path: ~/.mozilla/firefox/profiles.ini

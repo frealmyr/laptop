@@ -9,7 +9,18 @@
     - name: dnf - remove packages
       dnf:
         name:
-          - rythmbox
+          - rhythmbox
+          - gnome-weather
+          - gnome-contacts
+          - gnome-maps
+          - gnome-photos
+          - gnome-clocks
+          - totem
+          - simple-scan
+          - gnome-boxes
+          - mediawriter
+          - gnome-tour
+          - libreoffice-*
         state: absent
 
     - name: dnf - upgrade all packages
@@ -55,6 +66,19 @@
           - ufw
         state: latest
 
+    - name: dnf - install laptop packages
+      dnf:
+        name:
+          - '@multimedia'
+          - ffmpeg
+          - gstreamer1-vaapi
+          - intel-gpu-tools
+          - intel-media-driver
+          - libva
+          - libva-utils
+          - mesa-dri-drivers
+        state: latest
+
     - name: dnf - install user packages
       dnf:
         name:
@@ -63,7 +87,6 @@
           - curl
           - docker-compose
           - gnome-tweaks
-          - gpaste
           - htop
           - inxi
           - mc
@@ -72,11 +95,11 @@
           - peek
           - seahorse
           - tmux
-          - transmission
           - wget
+          - nautilus-gsconnect
+          - webextension-gsconnectdnf
           - wireguard-tools
           - wl-clipboard
-          - wofi
           - yamllint
           - yubikey-manager
           - zsh
@@ -86,12 +109,10 @@
       dnf:
         name:
           - gnome-shell-extension-auto-move-windows
-          - gnome-shell-extension-caffeine
-          - gnome-shell-extension-gpaste
           - gnome-shell-extension-no-overview
           - gnome-shell-extension-pop-shell
-          - gnome-shell-extension-sound-output-device-chooser
           - gnome-shell-extension-user-theme
+          - gnome-shell-extension-gsconnect
           - gnome-shell-extension-workspace-indicator
         state: latest
 
@@ -99,28 +120,28 @@
     ## Gnome ##
     ###########
 
-    # This will create a bunch of popups, no way around this limitation for now.
-    - name: extensions - install extensions
-      shell: |
-        gdbus call --session \
-          --dest org.gnome.Shell.Extensions \
-          --object-path /org/gnome/Shell/Extensions \
-          --method org.gnome.Shell.Extensions.InstallRemoteExtension \
-          "{{ item }}"
-      with_items:
-        - dash-to-panel@jderose9.github.com
-        - launch-new-instance@gnome-shell-extensions.gcampax.github.com
-        - notification-banner-reloaded@marcinjakubowski.github.com
-        - places-menu@gnome-shell-extensions.gcampax.github.com
-        - weeks-start-on-monday@extensions.gnome-shell.fifi.org
-        - wireguard-indicator@atareao.es
-      become_user: fredrick
+ #   - name: extensions - warn for popups
+ #     pause:
+ #       prompt: "Gnome will now create popups for extension install, you need to press install fast!"
 
-    # - name: dconf - enable gnome extensions
-    #   dconf:
-    #     key: "/org/gnome/shell/enabled-extensions"
-    #     value: "['background-logo@fedorahosted.org', 'dash-to-panel@jderose9.github.com', 'hass-gshell@geoph9-on-github', 'sound-output-device-chooser@kgshank.net']"
-    #   become_user: fredrick
+    # This will create a bunch of popups, no way around this limitation for now.
+  #  - name: extensions - install extensions
+   #   shell: |
+    #    gdbus call --session \
+     #     --dest org.gnome.Shell.Extensions \
+      #    --object-path /org/gnome/Shell/Extensions \
+       #   --method org.gnome.Shell.Extensions.InstallRemoteExtension \
+        #  "{{ item }}
+        #sleep 1"
+      #with_items:
+      #  - dash-to-panel@jderose9.github.com
+      #  - gtktitlebar@velitasali.github.io
+      #  - launch-new-instance@gnome-shell-extensions.gcampax.github.com
+      #  - notification-banner-reloaded@marcinjakubowski.github.com
+      #  - thinkpad-battery-threshold@marcosdalvarez.org
+      #  - weeks-start-on-monday@extensions.gnome-shell.fifi.org
+      #  - wireguard-indicator@atareao.es
+     # become_user: fredrick
 
     #############
     ## FlatPak ##
@@ -144,15 +165,14 @@
         - com.discordapp.Discord
         - com.github.tchx84.Flatseal
         - com.gitlab.newsflash
+        - com.jetbrains.IntelliJ-IDEA-Ultimate
         - com.jgraph.drawio.desktop
         - com.prusa3d.PrusaSlicer
-        - com.slack.Slack
+        - com.rafaelmardojai.Blanket
         - com.visualstudio.code
-        - nl.hjdskes.gcolor3
         - org.chromium.Chromium
-        - org.gnome.BreakTimer
         - org.gnome.Extensions
-        - org.gnome.gitlab.YaLTeR.VideoTrimmer
+        - org.remmina.Remmina
         - rest.insomnia.Insomnia
         - sh.cider.Cider
 

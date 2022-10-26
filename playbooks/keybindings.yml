@@ -99,6 +99,16 @@
         - /org/gnome/settings-daemon/plugins/media-keys/www
         - /org/gnome/shell/extensions/dash-to-dock/shortcut-text
         - /org/gnome/shell/extensions/pop-shell/activate-launcher
+        - /org/gnome/shell/extensions/pop-shell/pop-monitor-down
+        - /org/gnome/shell/extensions/pop-shell/pop-monitor-left
+        - /org/gnome/shell/extensions/pop-shell/pop-monitor-right
+        - /org/gnome/shell/extensions/pop-shell/pop-monitor-up
+        - /org/gnome/shell/extensions/pop-shell/pop-workspace-down
+        - /org/gnome/shell/extensions/pop-shell/pop-workspace-up
+        - /org/gnome/shell/extensions/pop-shell/tile-move-up-global
+        - /org/gnome/shell/extensions/pop-shell/tile-move-down-global
+        - /org/gnome/shell/extensions/pop-shell/tile-move-left-global
+        - /org/gnome/shell/extensions/pop-shell/tile-move-right-global
 
     ########################
     ## Create Keybindings ##
@@ -125,7 +135,7 @@
         - path: /org/gnome/settings-daemon/plugins/media-keys/search
           value: "['<Super>space']"
         - path: /org/gnome/desktop/wm/keybindings/close
-          value: "['<Super>q']"
+          value: "['<Shift><Super>q']"
         - path: /org/gnome/desktop/wm/keybindings/toggle-fullscreen
           value: "['<Super>f']"
         - path: /org/gnome/desktop/wm/keybindings/switch-to-workspace-1
@@ -201,3 +211,28 @@
       with_items:
         - path: /org/gnome/shell/extensions/pop-shell/toggle-floating
           value: "['<Super><Shift>f']"
+        - path: /org/gnome/shell/extensions/pop-shell/toggle-stacking-global
+          value: "['<Super><Shift>s']"
+        - path: /org/gnome/shell/extensions/pop-shell/toggle-tiling
+          value: "['<Super><Shift>t']"
+        - path: /org/gnome/shell/extensions/pop-shell/tile-orientation
+          value: "['<Super><Shift>o']"
+
+    - name: dconf - custom keybindings
+      community.general.dconf:
+        key: "{{ item.path }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name
+          value: "'Launch - Browser'"
+        - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command
+          value: "'firefox -P'"
+        - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding
+          value: "'<Shift><Super>Return'"
+        - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/name
+          value: "'Launch - Terminal'"
+        - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/command
+          value: "'alacritty'"
+        - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/binding
+          value: "'<Shift><Super>space'"
