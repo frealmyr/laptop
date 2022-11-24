@@ -18,16 +18,16 @@
     # Disable GVT-g virtualization as it is incompatible with GuC
     ## https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
 
-    - name: i915 - enable features
-      ansible.builtin.lineinfile:
-        path: /etc/modprobe.d/i915.conf
-        line: |
-          options i915 enable_guc=3
-          options i915 enable_fbc=1
-        create: yes
+#    - name: i915 - enable features
+ #     ansible.builtin.lineinfile:
+  #      path: /etc/modprobe.d/i915.conf
+   #     line: |
+    #      options i915 enable_guc=3
+     #     options i915 enable_fbc=1
+      #  create: yes
 
-    - name: i915 - rebuild intramfs
-      command: dracut --force
+ #   - name: i915 - rebuild intramfs
+  #    command: dracut --force
 
     ###########
     ## Gnome ##

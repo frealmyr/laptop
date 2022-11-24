@@ -96,8 +96,6 @@
           - seahorse
           - tmux
           - wget
-          - nautilus-gsconnect
-          - webextension-gsconnectdnf
           - wireguard-tools
           - wl-clipboard
           - yamllint
@@ -112,7 +110,6 @@
           - gnome-shell-extension-no-overview
           - gnome-shell-extension-pop-shell
           - gnome-shell-extension-user-theme
-          - gnome-shell-extension-gsconnect
           - gnome-shell-extension-workspace-indicator
         state: latest
 
