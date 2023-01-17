@@ -106,6 +106,7 @@
     - name: dnf - install gnome extension packages
       dnf:
         name:
+          - gnome-extensions-app
           - gnome-shell-extension-auto-move-windows
           - gnome-shell-extension-no-overview
           - gnome-shell-extension-pop-shell
@@ -162,7 +163,7 @@
         - com.discordapp.Discord
         - com.github.tchx84.Flatseal
         - com.gitlab.newsflash
-        - com.jetbrains.IntelliJ-IDEA-Ultimate
+        - com.jetbrains.IntelliJ-IDEA-Community
         - com.jgraph.drawio.desktop
         - com.prusa3d.PrusaSlicer
         - com.rafaelmardojai.Blanket
@@ -193,6 +194,7 @@
       with_items:
         - argo
         - argo-rollouts
+        - argocd
         - direnv
         - gcloud
         - github-cli
@@ -201,9 +203,9 @@
         - istioctl
         - kompose
         - krew
-        - pulumi
         - kubectl
         - operator-sdk
+        - pulumi
         - stern
         - terraform
         - terraform-docs
