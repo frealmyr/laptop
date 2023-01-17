@@ -16,64 +16,18 @@
 
     # Enable GuC, and HuC
     # Disable GVT-g virtualization as it is incompatible with GuC
-    ## https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
+    # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
 
-#    - name: i915 - enable features
- #     ansible.builtin.lineinfile:
-  #      path: /etc/modprobe.d/i915.conf
-   #     line: |
-    #      options i915 enable_guc=3
-     #     options i915 enable_fbc=1
-      #  create: yes
+    - name: i915 - enable features
+      ansible.builtin.lineinfile:
+        path: /etc/modprobe.d/i915.conf
+        line: |
+          options i915 enable_guc=3
+          options i915 enable_fbc=1
+        create: yes
 
- #   - name: i915 - rebuild intramfs
-  #    command: dracut --force
-
-    ###########
-    ## Gnome ##
-    ###########
-
-    # - name: dconf - enable gnome extensions
-    #   dconf:
-    #     key: "/org/gnome/shell/enabled-extensions"
-    #     value: "['dash-to-panel@jderose9.github.com', 'weeks-start-on-monday@extensions.gnome-shell.fifi.org', 'wireguard-indicator@atareao.es', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'no-overview@fthx', 'pop-shell@system76.com', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'notification-banner-reloaded@marcinjakubowski.github.com', 'launch-new-instance@gnome-shell-extensions.gcampax.github.com', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com']"
-    #   become_user: fredrick
-
-    - name: dconf - gnome window manager
-      community.general.dconf:
-        key: "{{ item.path }}"
-        value: "{{ item.value }}"
-        state: present
-      with_items:
-        - path: /org/gnome/shell/overrides/dynamic-workspaces
-          value: 0 # False
-        - path: /org/gnome/shell/overrides/workspaces-only-on-primary
-          value: 1 # True
-        - path: /org/gnome/desktop/wm/preferences/num-workspaces
-          value: "6"
-        - path: /org/gnome/mutter/center-new-windows
-          value: 0 # False
-        - path: /org/gnome/mutter/edge-tiling
-          value: 0 # False
-      become_user: fredrick
-
-    - name: dconf - popos shell
-      community.general.dconf:
-        key: "{{ item.path }}"
-        value: "{{ item.value }}"
-        state: present
-      with_items:
-        - path: /org/gnome/shell/extensions/pop-shell/active-hint
-          value: 1 # True
-        - path: /org/gnome/shell/extensions/pop-shell/hint-color-rgba
-          value: "['rgb(254,91,255)']"
-        - path: /org/gnome/shell/extensions/pop-shell/tile-by-default
-          value: 1 # True
-        - path: /org/gnome/shell/extensions/pop-shell/gap-inner
-          value: "1"
-        - path: /org/gnome/shell/extensions/pop-shell/gap-outer
-          value: "1"
-      become_user: fredrick
+    - name: i915 - rebuild intramfs
+      command: dracut --force
 
     # ########
     # ## UI ##
@@ -90,7 +44,6 @@
       ansible.builtin.git:
         repo: "https://github.com/dracula/gtk.git"
         dest: /usr/share/themes/dracula
-        version: "42"
 
     - name: dconf - use dracula as gnome gtk theme
       community.general.dconf:
@@ -126,8 +79,8 @@
       ansible.builtin.lineinfile:
         path: ~/.docker/config.json
         line: |
-          { 
-            "credsStore": "secretservice" 
+          {
+            "credsStore": "secretservice"
           }
         create: yes
       become_user: fredrick

@@ -6,29 +6,12 @@
     ## RPM Packages ##
     ##################
 
-    - name: dnf - remove packages
-      dnf:
-        name:
-          - rhythmbox
-          - gnome-weather
-          - gnome-contacts
-          - gnome-maps
-          - gnome-photos
-          - gnome-clocks
-          - totem
-          - simple-scan
-          - gnome-boxes
-          - mediawriter
-          - gnome-tour
-          - libreoffice-*
-        state: absent
-
     - name: dnf - upgrade all packages
       dnf:
         name: "*"
         state: latest
 
-    - name: dnf - import RPM keys
+    - name: dnf - import RPM fusion keys
       ansible.builtin.rpm_key:
         state: present
         key: "{{ item }}"
@@ -57,13 +40,12 @@
     - name: dnf - install system packages
       dnf:
         name:
-          - dconf-editor
           - ddcutil
           - fwupd
           - golang-github-docker-credential-helpers-devel
-          - python3-psutil # Required for ansible dconf module
           - smartmontools
           - ufw
+          - power-profiles-daemon # powerprofilesctl
         state: latest
 
     - name: dnf - install laptop packages
@@ -77,69 +59,65 @@
           - libva
           - libva-utils
           - mesa-dri-drivers
+          - light
+          - iwlax2xx-firmware
+          - alsa-sof-firmware
+          - alsa-firmware
+          - wpa_supplicant
+          - iw
+          - NetworkManager-wifi
+          - crda
         state: latest
+
+    - name: dnf - install cli packages
+      dnf:
+        name:
+          - bat
+          - curl
+          - git
+          - inxi
+          - mc
+          - pass
+          - tmux
+          - wget
+          - zip
+          - htop
+
+    - name: dnf - install sway packages
+      dnf:
+        name:
+          - dunst
+          - sddm
+          - sway
+          - swaybg
+          - swaylock
+          - swayidle
+          - waybar
+          - wdisplays
+          - wofi
+          - wob
+          - kanshi
+          - NetworkManager-tui
 
     - name: dnf - install user packages
       dnf:
         name:
           - alacritty
-          - bat
-          - curl
           - docker-compose
-          - gnome-tweaks
-          - htop
-          - inxi
-          - mc
+          - flatpak
           - mpv
-          - pass
           - peek
           - seahorse
-          - tmux
-          - wget
           - wireguard-tools
           - wl-clipboard
-          - yamllint
           - yubikey-manager
           - zsh
         state: latest
 
-    - name: dnf - install gnome extension packages
+    - name: dnf - install development packages
       dnf:
         name:
-          - gnome-extensions-app
-          - gnome-shell-extension-auto-move-windows
-          - gnome-shell-extension-no-overview
-          - gnome-shell-extension-pop-shell
-          - gnome-shell-extension-user-theme
-          - gnome-shell-extension-workspace-indicator
-        state: latest
-
-    ###########
-    ## Gnome ##
-    ###########
-
- #   - name: extensions - warn for popups
- #     pause:
- #       prompt: "Gnome will now create popups for extension install, you need to press install fast!"
-
-    # This will create a bunch of popups, no way around this limitation for now.
-  #  - name: extensions - install extensions
-   #   shell: |
-    #    gdbus call --session \
-     #     --dest org.gnome.Shell.Extensions \
-      #    --object-path /org/gnome/Shell/Extensions \
-       #   --method org.gnome.Shell.Extensions.InstallRemoteExtension \
-        #  "{{ item }}
-        #sleep 1"
-      #with_items:
-      #  - dash-to-panel@jderose9.github.com
-      #  - gtktitlebar@velitasali.github.io
-      #  - launch-new-instance@gnome-shell-extensions.gcampax.github.com
-      #  - notification-banner-reloaded@marcinjakubowski.github.com
-      #  - thinkpad-battery-threshold@marcosdalvarez.org
-      #  - weeks-start-on-monday@extensions.gnome-shell.fifi.org
-      #  - wireguard-indicator@atareao.es
-     # become_user: fredrick
+          - yamllint
 
     #############
     ## FlatPak ##
@@ -163,13 +141,10 @@
         - com.discordapp.Discord
         - com.github.tchx84.Flatseal
         - com.gitlab.newsflash
-        - com.jetbrains.IntelliJ-IDEA-Community
         - com.jgraph.drawio.desktop
         - com.prusa3d.PrusaSlicer
-        - com.rafaelmardojai.Blanket
         - com.visualstudio.code
         - org.chromium.Chromium
-        - org.gnome.Extensions
         - org.remmina.Remmina
         - rest.insomnia.Insomnia
         - sh.cider.Cider
