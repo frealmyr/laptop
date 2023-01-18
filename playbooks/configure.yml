@@ -33,6 +33,15 @@
     # ## UI ##
     # ########
 
+    - name: "Get current systemd default"
+      command: "systemctl get-default"
+      changed_when: false
+      register: systemdefault
+
+    - name: "Set default to graphical target"
+      command: "systemctl set-default graphical.target"
+      when: "'graphical' not in systemdefault.stdout"
+
     - name: dconf - disable all animations
       community.general.dconf:
         key: "/org/gnome/desktop/interface/enable-animations"

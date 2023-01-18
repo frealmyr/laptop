@@ -6,7 +6,7 @@
     ## RPM Packages ##
     ##################
 
-    - name: dnf - upgrade all packages
+    - name: dnf - upgrade latest
       dnf:
         name: "*"
         state: latest
@@ -28,102 +28,138 @@
     - name: dnf - add docker repository
       shell: dnf config-manager -y --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
 
-    - name: dnf - install docker packages
+    - name: dnf - system
       dnf:
         name:
+          - '@Core'
+          - '@Standard'
+          - '@System Tools'
+          - ddcutil
+          - fwupd
+          - gamemode
+          - golang-github-docker-credential-helpers-devel
+          - power-profiles-daemon # powerprofilesctl
+          - smartmontools
+          - ufw
+
+    - name: dnf - security
+      dnf:
+        name:
+          - fprintd-pam
+          - gnome-keyring-pam
+          - lxqt-policykit
+          - pinentry-gnome3
+          - polkit
+
+    - name: dnf - firmware & drivers
+      dnf:
+        name:
+        - '@Hardware Support'
+        - intel-gpu-tools
+        - intel-media-driver
+        - libva
+        - libva-utils
+        - mesa-dri-drivers
+
+    - name: dnf - audio/video
+      dnf:
+        name:
+          - '@multimedia'
+          - blueman
+          - gstreamer1-vaapi
+          - light
+          - pavucontrol
+          - pavucontrol-qt
+          - pipewire-codec-aptx
+          - playerctl
+          - pulseaudio-utils
+
+    - name: dnf - networking
+      dnf:
+        name:
+        - '@Common NetworkManager Submodules'
+        - network-manager-applet
+        - NetworkManager
+        - NetworkManager-config-connectivity-fedora
+        - NetworkManager-openvpn-gnome
+        - wireguard-tools
+
+    - name: dnf - virtualization & containerization
+      dnf:
+        name:
+          - '@Vagrant with libvirt support'
+          - '@Virtualization'
           - containerd.io
           - docker-ce
           - docker-ce-cli
           - docker-compose-plugin
-        state: latest
 
-    - name: dnf - install system packages
+    - name: dnf - printers
       dnf:
         name:
-          - ddcutil
-          - fwupd
-          - golang-github-docker-credential-helpers-devel
-          - smartmontools
-          - ufw
-          - power-profiles-daemon # powerprofilesctl
-        state: latest
+        - '@Printing Support'
+        - system-config-printer
 
-    - name: dnf - install laptop packages
+    - name: dnf - fonts
       dnf:
         name:
-          - '@multimedia'
-          - ffmpeg
-          - gstreamer1-vaapi
-          - intel-gpu-tools
-          - intel-media-driver
-          - libva
-          - libva-utils
-          - mesa-dri-drivers
-          - light
-          - iwlax2xx-firmware
-          - alsa-sof-firmware
-          - alsa-firmware
-          - wpa_supplicant
-          - iw
-          - NetworkManager-wifi
-          - crda
-        state: latest
+        - '@Fonts'
 
-    - name: dnf - install cli packages
+    - name: dnf - sway
+      dnf:
+        name:
+          - dunst
+          - grim
+          - kanshi
+          - sddm
+          - slurp
+          - sway
+          - swaybg
+          - swayidle
+          - swaylock
+          - waybar
+          - wdisplays
+          - wl-clipboard
+          - wofi
+          - xdg-desktop-portal-gtk
+          - xdg-desktop-portal-wlr
+          - xorg-x11-server-Xwayland
+
+    - name: dnf - cli
       dnf:
         name:
           - bat
           - curl
           - git
+          - htop
+          - docker-compose
           - inxi
           - mc
           - pass
           - tmux
           - wget
           - zip
-          - htop
+          - zsh
+          - yamllint
 
-    - name: dnf - install sway packages
-      dnf:
-        name:
-          - dunst
-          - sddm
-          - sway
-          - swaybg
-          - swaylock
-          - swayidle
-          - waybar
-          - wdisplays
-          - wofi
-          - wob
-          - kanshi
-          - NetworkManager-tui
-
-    - name: dnf - install user packages
+    - name: dnf - gui
       dnf:
         name:
           - alacritty
-          - docker-compose
           - flatpak
           - mpv
           - peek
           - seahorse
-          - wireguard-tools
-          - wl-clipboard
+          - Thunar
+          - thunar-archive-plugin
           - yubikey-manager
-          - zsh
         state: latest
-
-    - name: dnf - install development packages
-      dnf:
-        name:
-          - yamllint
 
     #############
     ## FlatPak ##
     #############
 
-    - name: add the flathub flatpak repository
+    - name: flatpak - flathub repository
       community.general.flatpak_remote:
         name: flathub
         state: present
@@ -131,7 +167,7 @@
         method: user
       become_user: fredrick
 
-    - name: install flatpak packages
+    - name: flatpak - install packages
       community.general.flatpak:
         name: "{{ item }}"
         state: present
