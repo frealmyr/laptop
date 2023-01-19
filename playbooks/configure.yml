@@ -33,14 +33,22 @@
     # ## UI ##
     # ########
 
-    - name: "Get current systemd default"
+    - name: systemd - get current systemd default
       command: "systemctl get-default"
       changed_when: false
       register: systemdefault
 
-    - name: "Set default to graphical target"
+    - name: systemd - default to graphical target
       command: "systemctl set-default graphical.target"
       when: "'graphical' not in systemdefault.stdout"
+
+    - name: sddm - override theme directory, set current theme
+      ansible.builtin.blockinfile:
+        path: /usr/lib/sddm/sddm.conf.d/x11.conf
+        block: |
+          [Theme]
+          ThemeDir=/home/fredrick/.local/themes/sddm
+          Current=chili
 
     - name: dconf - disable all animations
       community.general.dconf:
@@ -49,15 +57,23 @@
         state: present
       become_user: fredrick
 
-    - name: theme - download dracula gnome gtk theme
+    - name: git - download dracula gnome gtk theme
       ansible.builtin.git:
         repo: "https://github.com/dracula/gtk.git"
         dest: /usr/share/themes/dracula
+        update: true
 
     - name: dconf - use dracula as gnome gtk theme
       community.general.dconf:
         key: "/org/gnome/desktop/interface/gtk-theme"
         value: "'dracula'"
+        state: present
+      become_user: fredrick
+
+    - name: dconf - use dracula as gnome icon theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/icon-theme"
+        value: "'Papirus'"
         state: present
       become_user: fredrick
 

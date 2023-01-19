@@ -45,7 +45,7 @@
       path: ~/.mozilla/firefox/profiles.ini
       regexp: 'Name=default-release$'
       line: Name=home
- 
+
   - name: replace profile default-release path with home
     lineinfile:
       path: ~/.mozilla/firefox/profiles.ini

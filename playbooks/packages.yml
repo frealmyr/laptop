@@ -111,6 +111,8 @@
           - dunst
           - grim
           - kanshi
+          - qt5-qtgraphicaleffects # sddm theme
+          - qt5-qtquickcontrols
           - sddm
           - slurp
           - sway
@@ -147,6 +149,7 @@
         name:
           - alacritty
           - flatpak
+          - file-roller
           - mpv
           - peek
           - seahorse
