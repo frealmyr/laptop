@@ -85,6 +85,9 @@
         - NetworkManager-config-connectivity-fedora
         - NetworkManager-openvpn-gnome
         - wireguard-tools
+        - samba
+        - samba-common
+        - samba-client
 
     - name: dnf - virtualization & containerization
       dnf:
@@ -152,13 +155,15 @@
           - alacritty
           - blueman
           - file-roller
+          - file-roller-nautilus
           - flatpak
+          - gvfs-smb
           - mpv
+          - nautilus
           - peek
+          - raw-thumbnailer
           - seahorse
           - steam-devices
-          - Thunar
-          - thunar-archive-plugin
           - yubikey-manager
         state: latest
 
