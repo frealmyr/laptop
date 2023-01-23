@@ -10,18 +10,29 @@
     - name: set zsh as default shell
       shell: chsh -s $(which zsh) fredrick
 
-    ################
-    ## Intel i915 ##
-    ################
+    ############
+    ## Laptop ##
+    ############
+
+    - name: power - copy tlp config
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
+
+    - name: power - disable kernel power mgr, use tlp instead
+      ansible.builtin.systemd:
+        name: power-profiles-daemon.service
+        enabled: no
+        masked: yes
 
     # Enable GuC, and HuC
     # Disable GVT-g virtualization as it is incompatible with GuC
     # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
 
-    - name: i915 - enable features
-      ansible.builtin.lineinfile:
+    - name: gpu - enable i915 features
+      ansible.builtin.blockinfile:
         path: /etc/modprobe.d/i915.conf
-        line: |
+        block: |
           options i915 enable_guc=3
           options i915 enable_fbc=1
         create: yes
@@ -29,9 +40,16 @@
     - name: i915 - rebuild intramfs
       command: dracut --force
 
-    # ########
-    # ## UI ##
-    # ########
+    - name: mouse - thinkpad x1 carbon gen9 configs
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
+        #- { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
+        #- { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
+
+    #################
+    ## UI & Themes ##
+    #################
 
     - name: systemd - get current systemd default
       command: "systemctl get-default"
@@ -42,20 +60,18 @@
       command: "systemctl set-default graphical.target"
       when: "'graphical' not in systemdefault.stdout"
 
+    - name: sddm - copy chili theme
+      synchronize:
+        src: ./files/sddm/themes/chili
+        dest: /usr/share/sddm/themes
+
     - name: sddm - override theme directory, set current theme
       ansible.builtin.blockinfile:
         path: /usr/lib/sddm/sddm.conf.d/x11.conf
         block: |
           [Theme]
-          ThemeDir=/home/fredrick/.local/themes/sddm
+          ThemeDir=/usr/share/sddm/themes
           Current=chili
-
-    - name: dconf - disable all animations
-      community.general.dconf:
-        key: "/org/gnome/desktop/interface/enable-animations"
-        value: "false"
-        state: present
-      become_user: fredrick
 
     - name: git - download dracula gnome gtk theme
       ansible.builtin.git:
@@ -70,10 +86,17 @@
         state: present
       become_user: fredrick
 
-    - name: dconf - use dracula as gnome icon theme
+    - name: dconf - use papirus as gnome icon theme
       community.general.dconf:
         key: "/org/gnome/desktop/interface/icon-theme"
         value: "'Papirus'"
+        state: present
+      become_user: fredrick
+
+    - name: dconf - disable all animations
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/enable-animations"
+        value: "false"
         state: present
       become_user: fredrick
 
@@ -93,23 +116,6 @@
       user: name=fredrick
         groups=docker
         append=yes
-
-    - name: docker - check if docker config.json exists
-      stat:
-        path: ~/.docker/config.json
-      become_user: fredrick
-      register: dockerfile_exist_result
-
-    - name: docker - use gnome keychain for credsStore
-      ansible.builtin.lineinfile:
-        path: ~/.docker/config.json
-        line: |
-          {
-            "credsStore": "secretservice"
-          }
-        create: yes
-      become_user: fredrick
-      when: not dockerfile_exist_result.stat.exists
 
     - name: docker - disable system services (for power savings)
       ansible.builtin.systemd:

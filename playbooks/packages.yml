@@ -40,6 +40,8 @@
           - golang-github-docker-credential-helpers-devel
           - power-profiles-daemon # powerprofilesctl
           - smartmontools
+          - tlp
+          - tlp-rdw
           - ufw
 
     - name: dnf - security
@@ -132,27 +134,29 @@
         name:
           - bat
           - curl
+          - docker-compose
           - git
           - htop
-          - docker-compose
           - inxi
           - mc
           - pass
           - tmux
           - wget
+          - yamllint
           - zip
           - zsh
-          - yamllint
 
     - name: dnf - gui
       dnf:
         name:
           - alacritty
-          - flatpak
+          - blueman
           - file-roller
+          - flatpak
           - mpv
           - peek
           - seahorse
+          - steam-devices
           - Thunar
           - thunar-archive-plugin
           - yubikey-manager
@@ -179,14 +183,20 @@
       with_items:
         - com.discordapp.Discord
         - com.github.tchx84.Flatseal
+        - com.github.vikdevelop.photopea_app
         - com.gitlab.newsflash
         - com.jgraph.drawio.desktop
         - com.prusa3d.PrusaSlicer
+        - com.rawtherapee.RawTherapee
         - com.visualstudio.code
         - org.chromium.Chromium
+        - org.darktable.Darktable
         - org.remmina.Remmina
         - rest.insomnia.Insomnia
         - sh.cider.Cider
+        - org.kde.digikam
+        - com.github.wwmm.easyeffects
+        - com.valvesoftware.Steam
 
     ##########
     ## asdf ##
