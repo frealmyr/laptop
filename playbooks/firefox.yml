@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  become: true
+  become_user: fredrick
+  vars:
+    profiles_dir: /home/fredrick/.mozilla/firefox
+    profiles:
+      - Personal
+      - Sonat
+  tasks:
+    - name: firefox - check existing profiles
+      stat:
+        path: "{{ profiles_dir }}/{{ item }}"
+      with_items: "{{ profiles }}"
+      register: dir_to_check
+
+    - name: firefox - create list of missing profiles
+      set_fact:
+        missing_profiles: "{{ dir_to_check.results | selectattr('stat.exists','==',false) | map(attribute='item') | list }}"
+
+    - name: firefox - generate missing profiles
+      command: firefox -CreateProfile "{{ item }} {{ profiles_dir }}/{{ item }}"
+      with_items: "{{ missing_profiles }}"
+
+    - name: firefox - create chrome folder
+      file:
+        path: "{{ profiles_dir }}/{{ item }}/chrome"
+        state: directory
+      with_items: "{{ missing_profiles }}"
+
+    - name: firefox - copy userChrome.css
+      copy: src=files/firefox/chrome/userChrome.css dest={{ profiles_dir }}/{{ item }}/chrome
+      with_items: "{{ missing_profiles }}"
+
+    - name: firefox - copy user.js
+      copy: src=files/firefox/user.js dest={{ profiles_dir }}/{{ item }}
+      with_items: "{{ missing_profiles }}"
+
+    - name: firefox - disable start last profile
+      lineinfile:
+        path: ~/.mozilla/firefox/profiles.ini
+        regexp: '^StartWithLastProfile=.*'
+        line: StartWithLastProfile=0

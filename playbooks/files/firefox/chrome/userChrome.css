@@ -15,7 +15,8 @@
   display:none!important;
 }
 
-/* Hide sidebar splitter when using Tree Style Tab.  */
-/* #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] + #sidebar-splitter {
-  display: none !important;
-} */
+/* Shrinks sidebar splitter when using sudeberry  */
+#sidebar-box[sidebarcommand="_3c078156-979c-498b-8990-85f7987dd929_-sidebar-action"] + #sidebar-splitter {
+  /* display: none !important; */
+  max-width: 1px !important;
+}

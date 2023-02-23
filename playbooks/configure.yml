@@ -108,9 +108,76 @@
       command: sudo flatpak override --env=GTK_THEME=Dracula
       become_user: fredrick
 
-    # ############
-    # ## Docker ##
-    # ############
+    #############
+    ## Systemd ##
+    #############
+
+    ## gnome-keyring-daemon
+    # auto-login on session with ssh key support
+
+    - name: systemd - create systemd user service dir
+      ansible.builtin.file:
+        path: /home/fredrick/.config/systemd/user
+        state: directory
+      become_user: fredrick
+
+    - name: systemd - copy default gnome-keyring-daemon.service
+      synchronize:
+        dest: /home/fredrick/.config/systemd/user
+        src: /usr/lib/systemd/user/gnome-keyring-daemon.service
+
+    - name: systemd - enable ssh on gnome-keyring-daemon.service
+      ansible.builtin.replace:
+        path: /usr/lib/systemd/user/gnome-keyring-daemon.service
+        regexp: '"pkcs11,secrets"'
+        replace: '"pkcs11,secrets,ssh"'
+
+    - name: systemd - override gnome-keyring service with pkcsl,ssh,secret components
+      ansible.builtin.systemd:
+        name: gnome-keyring-daemon
+        state: started
+        scope: user
+        enabled: true
+        daemon_reload: true
+      become_user: fredrick
+
+    - name: pamd - unlock gnome-keyring during auth
+      community.general.pamd:
+        name: login
+        type: auth
+        control: include
+        module_path: postlogin
+        new_type: auth
+        new_control: optional
+        new_module_path: pam_gnome_keyring.so
+        state: after
+
+    - name: pamd - update gnome-keyring password during password update
+      community.general.pamd:
+        name: login
+        type: password
+        control: include
+        module_path: system-auth
+        new_type: password
+        new_control: optional
+        new_module_path: pam_gnome_keyring.so
+        state: after
+
+    - name: pamd - start gnome-keyring on new session
+      community.general.pamd:
+        name: login
+        type: session
+        control: include
+        module_path: postlogin
+        new_type: session
+        new_control: optional
+        new_module_path: pam_gnome_keyring.so
+        module_arguments: 'auto_start'
+        state: after
+
+    ############
+    ## Docker ##
+    ############
 
     - name: docker - add user to docker group
       user: name=fredrick
@@ -128,9 +195,9 @@
         - docker.service
         - containerd.service
 
-    # ##############
-    # ## Firewall ##
-    # ##############
+    ##############
+    ## Firewall ##
+    ##############
 
     - name: firewall - enable ufw
       community.general.ufw:

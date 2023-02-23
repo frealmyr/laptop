@@ -28,3 +28,4 @@ user_pref("security.insecure_connection_text.enabled", true);
 user_pref("toolkit.cosmeticAnimations.enabled", false);
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("widget.wayland-dmabuf-vaapi.enabled", true);
+user_pref("extensions.unifiedExtensions.enabled", false);
