@@ -146,16 +146,18 @@
           - curl
           - docker-compose
           - git
+          - gvfs-goa # google drive in gnome-files
+          - gvfs-smb
           - htop
           - inxi
           - mc
           - pass
+          - python3-pip
           - sshpass
           - tmux
           - wget
           - yamllint
           - zip
-          - python3-pip
           - zsh
 
     - name: dnf - gui
@@ -163,16 +165,19 @@
         name:
           - alacritty
           - blueman
+          - digikam # why not flatpak = https://github.com/flathub/org.kde.digikam/issues/17
           - eog
           - file-roller
-          - firefox
           - file-roller-nautilus
+          - firefox
           - flatpak
-          - gvfs-smb
+          - gnome-control-center
+          - gnome-online-accounts
+          - gnome-system-log
+          - gnome-system-monitor
           - mpv
           - nautilus
           - peek
-          - digikam # why not flatpak = https://github.com/flathub/org.kde.digikam/issues/17
           - raw-thumbnailer
           - seahorse
           - steam-devices

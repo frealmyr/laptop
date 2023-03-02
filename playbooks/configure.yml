@@ -19,11 +19,21 @@
       with_items:
         - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
 
-    - name: power - disable kernel power mgr, use tlp instead
+    - name: power - disable kernel power management
       ansible.builtin.systemd:
-        name: power-profiles-daemon.service
+        name: "{{ item }}"
         enabled: no
         masked: yes
+      with_items:
+        - power-profiles-daemon.service
+        - systemd-rfkill.service
+        - systemd-rfkill.socket
+
+    - name: power - enable tlp power management
+      ansible.builtin.systemd:
+        name: tlp.service
+        enabled: yes
+        state: started
 
     # Enable GuC, and HuC
     # Disable GVT-g virtualization as it is incompatible with GuC
