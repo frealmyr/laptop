@@ -1,6 +1,6 @@
-# Laptop
+# Workstation
 
-I strive to keep all configuration for my laptop as code.
+I strive to keep all configuration for my workstation as code.
 
 This repository contains Ansible playbooks for configuring my Thinkpad X1 Carbon Gen9, which also [configure my dotfiles as a bare git repository.](dotfiles.md)
 
