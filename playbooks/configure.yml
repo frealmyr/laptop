@@ -10,52 +10,52 @@
     - name: set zsh as default shell
       shell: chsh -s $(which zsh) fredrick
 
-    ############
-    ## Laptop ##
-    ############
+    # ############
+    # ## Laptop ##
+    # ############
 
-    - name: power - copy tlp config
-      copy: src={{ item.src }} dest={{ item.dest }}
-      with_items:
-        - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
+    # - name: power - copy tlp config
+    #   copy: src={{ item.src }} dest={{ item.dest }}
+    #   with_items:
+    #     - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
 
-    - name: power - disable kernel power management
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        enabled: no
-        masked: yes
-      with_items:
-        - power-profiles-daemon.service
-        - systemd-rfkill.service
-        - systemd-rfkill.socket
+    # - name: power - disable kernel power management
+    #   ansible.builtin.systemd:
+    #     name: "{{ item }}"
+    #     enabled: no
+    #     masked: yes
+    #   with_items:
+    #     - power-profiles-daemon.service
+    #     - systemd-rfkill.service
+    #     - systemd-rfkill.socket
 
-    - name: power - enable tlp power management
-      ansible.builtin.systemd:
-        name: tlp.service
-        enabled: yes
-        state: started
+    # - name: power - enable tlp power management
+    #   ansible.builtin.systemd:
+    #     name: tlp.service
+    #     enabled: yes
+    #     state: started
 
-    # Enable GuC, and HuC
-    # Disable GVT-g virtualization as it is incompatible with GuC
-    # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
+    # # Enable GuC, and HuC
+    # # Disable GVT-g virtualization as it is incompatible with GuC
+    # # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
 
-    - name: gpu - enable i915 features
-      ansible.builtin.blockinfile:
-        path: /etc/modprobe.d/i915.conf
-        block: |
-          options i915 enable_guc=3
-          options i915 enable_fbc=1
-        create: yes
+    # - name: gpu - enable i915 features
+    #   ansible.builtin.blockinfile:
+    #     path: /etc/modprobe.d/i915.conf
+    #     block: |
+    #       options i915 enable_guc=3
+    #       options i915 enable_fbc=1
+    #     create: yes
 
-    - name: i915 - rebuild intramfs
-      command: dracut --force
+    # - name: i915 - rebuild intramfs
+    #   command: dracut --force
 
-    - name: mouse - thinkpad x1 carbon gen9 configs
-      copy: src={{ item.src }} dest={{ item.dest }}
-      with_items:
-        - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
-        #- { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
-        #- { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
+    # - name: mouse - thinkpad x1 carbon gen9 configs
+    #   copy: src={{ item.src }} dest={{ item.dest }}
+    #   with_items:
+    #     - { src: './files/modprobe.d/blacklist-touchpad.conf', dest: '/etc/modprobe.d/blacklist-touchpad.conf' }
+    #     #- { src: './files/libinput/99-custom-x1c.quirks', dest: '/usr/share/libinput/99-custom-x1c.quirks' }
+    #     #- { src: './files/udev/99-trackpoint.rules', dest: '/etc/udev/rules.d/99-trackpoint.rules' }
 
     #################
     ## UI & Themes ##

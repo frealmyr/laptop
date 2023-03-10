@@ -64,8 +64,8 @@
       dnf:
         name:
         - '@Hardware Support'
-        - intel-gpu-tools
-        - intel-media-driver
+        # - intel-gpu-tools
+        # - intel-media-driver
         - libva
         - libva-utils
         - mesa-dri-drivers
