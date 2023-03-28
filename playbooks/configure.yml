@@ -10,45 +10,24 @@
     - name: set zsh as default shell
       shell: chsh -s $(which zsh) fredrick
 
-    # ############
-    # ## Laptop ##
-    # ############
+    ############
+    ## Laptop ##
+    ############
 
-    # - name: power - copy tlp config
-    #   copy: src={{ item.src }} dest={{ item.dest }}
-    #   with_items:
-    #     - { src: './files/tlp/99-x1c.conf', dest: '/etc/tlp.d/99-x1c.conf' }
+    # Enable GuC, and HuC
+    # Disable GVT-g virtualization as it is incompatible with GuC
+    # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
 
-    # - name: power - disable kernel power management
-    #   ansible.builtin.systemd:
-    #     name: "{{ item }}"
-    #     enabled: no
-    #     masked: yes
-    #   with_items:
-    #     - power-profiles-daemon.service
-    #     - systemd-rfkill.service
-    #     - systemd-rfkill.socket
+    - name: gpu - enable i915 features
+      ansible.builtin.blockinfile:
+        path: /etc/modprobe.d/i915.conf
+        block: |
+          options i915 enable_guc=3
+          options i915 enable_fbc=1
+        create: yes
 
-    # - name: power - enable tlp power management
-    #   ansible.builtin.systemd:
-    #     name: tlp.service
-    #     enabled: yes
-    #     state: started
-
-    # # Enable GuC, and HuC
-    # # Disable GVT-g virtualization as it is incompatible with GuC
-    # # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
-
-    # - name: gpu - enable i915 features
-    #   ansible.builtin.blockinfile:
-    #     path: /etc/modprobe.d/i915.conf
-    #     block: |
-    #       options i915 enable_guc=3
-    #       options i915 enable_fbc=1
-    #     create: yes
-
-    # - name: i915 - rebuild intramfs
-    #   command: dracut --force
+    - name: i915 - rebuild intramfs
+      command: dracut --force
 
     # - name: mouse - thinkpad x1 carbon gen9 configs
     #   copy: src={{ item.src }} dest={{ item.dest }}
@@ -61,27 +40,27 @@
     ## UI & Themes ##
     #################
 
-    - name: systemd - get current systemd default
-      command: "systemctl get-default"
-      changed_when: false
-      register: systemdefault
+    # - name: systemd - get current systemd default
+    #   command: "systemctl get-default"
+    #   changed_when: false
+    #   register: systemdefault
 
-    - name: systemd - default to graphical target
-      command: "systemctl set-default graphical.target"
-      when: "'graphical' not in systemdefault.stdout"
+    # - name: systemd - default to graphical target
+    #   command: "systemctl set-default graphical.target"
+    #   when: "'graphical' not in systemdefault.stdout"
 
-    - name: sddm - copy chili theme
-      synchronize:
-        src: ./files/sddm/themes/chili
-        dest: /usr/share/sddm/themes
+    # - name: sddm - copy chili theme
+    #   synchronize:
+    #     src: ./files/sddm/themes/chili
+    #     dest: /usr/share/sddm/themes
 
-    - name: sddm - override theme directory, set current theme
-      ansible.builtin.blockinfile:
-        path: /usr/lib/sddm/sddm.conf.d/x11.conf
-        block: |
-          [Theme]
-          ThemeDir=/usr/share/sddm/themes
-          Current=chili
+    # - name: sddm - override theme directory, set current theme
+    #   ansible.builtin.blockinfile:
+    #     path: /usr/lib/sddm/sddm.conf.d/x11.conf
+    #     block: |
+    #       [Theme]
+    #       ThemeDir=/usr/share/sddm/themes
+    #       Current=chili
 
     - name: git - download dracula gnome gtk theme
       ansible.builtin.git:
@@ -125,65 +104,65 @@
     ## gnome-keyring-daemon
     # auto-login on session with ssh key support
 
-    - name: systemd - create systemd user service dir
-      ansible.builtin.file:
-        path: /home/fredrick/.config/systemd/user
-        state: directory
-      become_user: fredrick
+    # - name: systemd - create systemd user service dir
+    #   ansible.builtin.file:
+    #     path: /home/fredrick/.config/systemd/user
+    #     state: directory
+    #   become_user: fredrick
 
-    - name: systemd - copy default gnome-keyring-daemon.service
-      synchronize:
-        dest: /home/fredrick/.config/systemd/user
-        src: /usr/lib/systemd/user/gnome-keyring-daemon.service
+    # - name: systemd - copy default gnome-keyring-daemon.service
+    #   synchronize:
+    #     dest: /home/fredrick/.config/systemd/user
+    #     src: /usr/lib/systemd/user/gnome-keyring-daemon.service
 
-    - name: systemd - enable ssh on gnome-keyring-daemon.service
-      ansible.builtin.replace:
-        path: /usr/lib/systemd/user/gnome-keyring-daemon.service
-        regexp: '"pkcs11,secrets"'
-        replace: '"pkcs11,secrets,ssh"'
+    # - name: systemd - enable ssh on gnome-keyring-daemon.service
+    #   ansible.builtin.replace:
+    #     path: /usr/lib/systemd/user/gnome-keyring-daemon.service
+    #     regexp: '"pkcs11,secrets"'
+    #     replace: '"pkcs11,secrets,ssh"'
 
-    - name: systemd - override gnome-keyring service with pkcsl,ssh,secret components
-      ansible.builtin.systemd:
-        name: gnome-keyring-daemon
-        state: started
-        scope: user
-        enabled: true
-        daemon_reload: true
-      become_user: fredrick
+    # - name: systemd - override gnome-keyring service with pkcsl,ssh,secret components
+    #   ansible.builtin.systemd:
+    #     name: gnome-keyring-daemon
+    #     state: started
+    #     scope: user
+    #     enabled: true
+    #     daemon_reload: true
+    #   become_user: fredrick
 
-    - name: pamd - unlock gnome-keyring during auth
-      community.general.pamd:
-        name: login
-        type: auth
-        control: include
-        module_path: postlogin
-        new_type: auth
-        new_control: optional
-        new_module_path: pam_gnome_keyring.so
-        state: after
+    # - name: pamd - unlock gnome-keyring during auth
+    #   community.general.pamd:
+    #     name: login
+    #     type: auth
+    #     control: include
+    #     module_path: postlogin
+    #     new_type: auth
+    #     new_control: optional
+    #     new_module_path: pam_gnome_keyring.so
+    #     state: after
 
-    - name: pamd - update gnome-keyring password during password update
-      community.general.pamd:
-        name: login
-        type: password
-        control: include
-        module_path: system-auth
-        new_type: password
-        new_control: optional
-        new_module_path: pam_gnome_keyring.so
-        state: after
+    # - name: pamd - update gnome-keyring password during password update
+    #   community.general.pamd:
+    #     name: login
+    #     type: password
+    #     control: include
+    #     module_path: system-auth
+    #     new_type: password
+    #     new_control: optional
+    #     new_module_path: pam_gnome_keyring.so
+    #     state: after
 
-    - name: pamd - start gnome-keyring on new session
-      community.general.pamd:
-        name: login
-        type: session
-        control: include
-        module_path: postlogin
-        new_type: session
-        new_control: optional
-        new_module_path: pam_gnome_keyring.so
-        module_arguments: 'auto_start'
-        state: after
+    # - name: pamd - start gnome-keyring on new session
+    #   community.general.pamd:
+    #     name: login
+    #     type: session
+    #     control: include
+    #     module_path: postlogin
+    #     new_type: session
+    #     new_control: optional
+    #     new_module_path: pam_gnome_keyring.so
+    #     module_arguments: 'auto_start'
+    #     state: after
 
     ############
     ## Docker ##
@@ -204,12 +183,3 @@
         - docker.socket
         - docker.service
         - containerd.service
-
-    ##############
-    ## Firewall ##
-    ##############
-
-    - name: firewall - enable ufw
-      community.general.ufw:
-        state: enabled
-        policy: deny

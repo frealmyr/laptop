@@ -11,6 +11,12 @@
         name: "*"
         state: latest
 
+    - name: dnf - remove packages
+      dnf:
+        name:
+          - dunst
+        state: absent
+
     - name: dnf - import RPM fusion keys
       ansible.builtin.rpm_key:
         state: present
@@ -38,107 +44,44 @@
     - name: dnf - system
       dnf:
         name:
-          - '@Core'
-          - '@Standard'
-          - '@System Tools'
           - ddcutil
           - fwupd
-          - gamemode
           - golang-github-docker-credential-helpers-devel
           - power-profiles-daemon # powerprofilesctl
-          - smartmontools
-          - tlp
-          - tlp-rdw
-          - ufw
-
-    - name: dnf - security
-      dnf:
-        name:
-          - fprintd-pam
-          - gnome-keyring-pam
-          - lxqt-policykit
-          - pinentry-gnome3
-          - polkit
-          - polkit-gnome
 
     - name: dnf - firmware & drivers
       dnf:
         name:
-        - '@Hardware Support'
-        # - intel-gpu-tools
-        # - intel-media-driver
-        - libva
-        - libva-utils
-        - mesa-dri-drivers
+          - intel-gpu-tools
+          - intel-media-driver
+          - libva
+          - libva-utils
+          - mesa-dri-drivers
 
     - name: dnf - audio/video
       dnf:
         name:
-          - '@multimedia'
-          - blueman
-          - gstreamer1-vaapi
-          - light
-          - pavucontrol
-          - pavucontrol-qt
           - pipewire-codec-aptx
-          - playerctl
-          - pulseaudio-utils
 
     - name: dnf - networking
       dnf:
         name:
-        - '@Common NetworkManager Submodules'
-        - network-manager-applet
-        - NetworkManager
-        - NetworkManager-config-connectivity-fedora
-        - NetworkManager-openvpn-gnome
-        - wireguard-tools
-        - samba
-        - samba-common
-        - samba-client
+          - wireguard-tools
 
-    - name: dnf - virtualization & containerization
-      dnf:
-        name:
-          - '@Vagrant with libvirt support'
-          - '@Virtualization'
-          - containerd.io
-          - docker-ce
-          - docker-ce-cli
-          - docker-compose-plugin
-
-    - name: dnf - printers
-      dnf:
-        name:
-        - '@Printing Support'
-        - system-config-printer
-
-    - name: dnf - fonts
-      dnf:
-        name:
-        - '@Fonts'
+    # - name: dnf - virtualization & containerization
+    #   dnf:
+    #     name:
+    #       - containerd.io
+    #       - docker-ce
+    #       - docker-ce-cli
+    #       - docker-compose
+    #       - docker-compose-plugin
 
     - name: dnf - sway
       dnf:
         name:
-          - grim
-          - kanshi
-          - qt5-qtgraphicaleffects # sddm theme
-          - qt5-qtquickcontrols
-          - sddm
-          - slurp
-          - sway
-          - swaybg
-          - swayidle
-          - swaylock
           - SwayNotificationCenter
-          - waybar
           - wdisplays
-          - wl-clipboard
-          - wofi
-          - xdg-desktop-portal-gtk
-          - xdg-desktop-portal-wlr
-          - xorg-x11-server-Xwayland
           - wlsunset
 
     - name: dnf - cli
@@ -146,14 +89,10 @@
         name:
           - bat
           - curl
-          - docker-compose
           - git
-          - gvfs-goa # google drive in gnome-files
-          - gvfs-smb
           - htop
           - inxi
           - mc
-          - pass
           - python3-pip
           - sshpass
           - tmux
@@ -165,23 +104,9 @@
     - name: dnf - gui
       dnf:
         name:
-          - alacritty
-          - blueman
-          - digikam # why not flatpak = https://github.com/flathub/org.kde.digikam/issues/17
-          - eog
-          - file-roller
-          - file-roller-nautilus
           - firefox
           - flatpak
-          - gnome-control-center
-          - gnome-online-accounts
-          - gnome-system-log
-          - gnome-system-monitor
           - mpv
-          - nautilus
-          - peek
-          - raw-thumbnailer
-          - seahorse
           - steam-devices
           - yubikey-manager
         state: latest
@@ -212,25 +137,19 @@
       with_items:
         - com.discordapp.Discord
         - com.github.tchx84.Flatseal
-        - com.github.vikdevelop.photopea_app
-        - com.github.wwmm.easyeffects
         - com.gitlab.newsflash
-        - com.jgraph.drawio.desktop
         - com.prusa3d.PrusaSlicer
         - com.rawtherapee.RawTherapee
         - com.sweethome3d.Sweethome3d
         - com.valvesoftware.Steam
         - com.visualstudio.code
-        - io.dbeaver.DBeaverCommunity
-        - net.scribus.Scribus
         - net.scribus.Scribus
         - org.chromium.Chromium
-        - org.darktable.Darktable
         - org.filmulator.Filmulator
+        - org.kde.digikam
         - org.remmina.Remmina
         - rest.insomnia.Insomnia
         - sh.cider.Cider
-        # - org.kde.digikam
 
     ##########
     ## asdf ##
@@ -240,7 +159,7 @@
       git:
         repo: "https://github.com/asdf-vm/asdf.git"
         dest: "~/.asdf"
-        version: v0.10.2
+        version: v0.11.3
         update: no
         accept_hostkey: yes
       become_user: fredrick
