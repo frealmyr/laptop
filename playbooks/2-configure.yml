@@ -68,26 +68,26 @@
         dest: /usr/share/themes/dracula
         update: true
 
-    - name: dconf - use dracula as gnome gtk theme
-      community.general.dconf:
-        key: "/org/gnome/desktop/interface/gtk-theme"
-        value: "'dracula'"
-        state: present
-      become_user: fredrick
+    # - name: dconf - use dracula as gnome gtk theme
+    #   community.general.dconf:
+    #     key: "/org/gnome/desktop/interface/gtk-theme"
+    #     value: "'dracula'"
+    #     state: present
+    #   become_user: fredrick
 
-    - name: dconf - use papirus as gnome icon theme
-      community.general.dconf:
-        key: "/org/gnome/desktop/interface/icon-theme"
-        value: "'Papirus'"
-        state: present
-      become_user: fredrick
+    # - name: dconf - use papirus as gnome icon theme
+    #   community.general.dconf:
+    #     key: "/org/gnome/desktop/interface/icon-theme"
+    #     value: "'Papirus'"
+    #     state: present
+    #   become_user: fredrick
 
-    - name: dconf - disable all animations
-      community.general.dconf:
-        key: "/org/gnome/desktop/interface/enable-animations"
-        value: "false"
-        state: present
-      become_user: fredrick
+    # - name: dconf - disable all animations
+    #   community.general.dconf:
+    #     key: "/org/gnome/desktop/interface/enable-animations"
+    #     value: "false"
+    #     state: present
+    #   become_user: fredrick
 
     - name: flatpak - allow themes folder in home
       command: sudo flatpak override --filesystem=$HOME/.themes
@@ -168,18 +168,18 @@
     ## Docker ##
     ############
 
-    - name: docker - add user to docker group
-      user: name=fredrick
-        groups=docker
-        append=yes
+    # - name: docker - add user to docker group
+    #   user: name=fredrick
+    #     groups=docker
+    #     append=yes
 
-    - name: docker - disable system services (for power savings)
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        enabled: no
-        masked: no
-      become_user: root
-      with_items:
-        - docker.socket
-        - docker.service
-        - containerd.service
+    # - name: docker - disable system services (for power savings)
+    #   ansible.builtin.systemd:
+    #     name: "{{ item }}"
+    #     enabled: no
+    #     masked: no
+    #   become_user: root
+    #   with_items:
+    #     - docker.socket
+    #     - docker.service
+    #     - containerd.service
