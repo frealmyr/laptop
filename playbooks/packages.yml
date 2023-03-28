@@ -59,6 +59,7 @@
           - lxqt-policykit
           - pinentry-gnome3
           - polkit
+          - polkit-gnome
 
     - name: dnf - firmware & drivers
       dnf:
@@ -138,6 +139,7 @@
           - xdg-desktop-portal-gtk
           - xdg-desktop-portal-wlr
           - xorg-x11-server-Xwayland
+          - wlsunset
 
     - name: dnf - cli
       dnf:
