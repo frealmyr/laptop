@@ -206,8 +206,10 @@
         - com.github.wwmm.easyeffects
         - com.gitlab.newsflash
         - com.jgraph.drawio.desktop
+        - com.moonlight_stream.Moonlight
         - com.prusa3d.PrusaSlicer
         - com.rawtherapee.RawTherapee
+        - com.spotify.Client
         - com.sweethome3d.Sweethome3d
         - com.valvesoftware.Steam
         - com.visualstudio.code
