@@ -11,12 +11,6 @@
         name: "*"
         state: latest
 
-    - name: dnf - remove packages
-      dnf:
-        name:
-          - dunst
-        state: absent
-
     - name: dnf - import RPM fusion keys
       ansible.builtin.rpm_key:
         state: present
@@ -31,8 +25,8 @@
         - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
         - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
 
-    - name: dnf - add docker repository
-      shell: dnf config-manager -y --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+    # - name: dnf - add docker repository
+    #   shell: dnf config-manager -y --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
 
     - name: copr - enable repositories
       community.general.copr:
@@ -44,55 +38,112 @@
     - name: dnf - system
       dnf:
         name:
+          - '@Core'
+          - '@Standard'
           - ddcutil
-          - fwupd
+          - gamemode
           - golang-github-docker-credential-helpers-devel
-          - power-profiles-daemon # powerprofilesctl
+          - tuned
+
+    - name: dnf - security
+      dnf:
+        name:
+          - fprintd-pam
+          - gnome-keyring-pam
+          - lxqt-policykit
+          - pinentry-gnome3
+          - polkit
+          - polkit-gnome
 
     - name: dnf - firmware & drivers
       dnf:
         name:
-          - intel-gpu-tools
-          - intel-media-driver
-          - libva
-          - libva-utils
-          - mesa-dri-drivers
+        - '@Hardware Support'
+        - libva
+        - libva-utils
+        - mesa-dri-drivers
 
     - name: dnf - audio/video
       dnf:
         name:
+          - '@multimedia'
+          - gstreamer1-vaapi
+          - light
+          - pavucontrol
+          - pavucontrol-qt
           - pipewire-codec-aptx
+          - playerctl
+          - pulseaudio-utils
 
     - name: dnf - networking
       dnf:
         name:
-          - wireguard-tools
+        - '@Common NetworkManager Submodules'
+        - blueman
+        - network-manager-applet
+        - NetworkManager
+        - NetworkManager-config-connectivity-fedora
+        - NetworkManager-openvpn-gnome
+        - samba
+        - samba-client
+        - samba-common
+        - wireguard-tools
 
-    # - name: dnf - virtualization & containerization
+    # - name: dnf - ontainerization
     #   dnf:
     #     name:
     #       - containerd.io
     #       - docker-ce
     #       - docker-ce-cli
-    #       - docker-compose
     #       - docker-compose-plugin
+
+    - name: dnf - printers
+      dnf:
+        name:
+        - '@Printing Support'
+        - system-config-printer
+
+    - name: dnf - fonts
+      dnf:
+        name:
+        - '@Fonts'
 
     - name: dnf - sway
       dnf:
         name:
+          - grim
+          - kanshi
+          - qt5-qtgraphicaleffects # sddm theme
+          - qt5-qtquickcontrols
+          - sddm
+          - slurp
+          - sway
+          - swaybg
+          - swayidle
+          - swaylock
           - SwayNotificationCenter
+          - waybar
           - wdisplays
+          - wl-clipboard
           - wlsunset
+          - wofi
+          - xdg-desktop-portal-gtk
+          - xdg-desktop-portal-wlr
+          - xorg-x11-server-Xwayland
 
     - name: dnf - cli
       dnf:
         name:
           - bat
           - curl
+          - docker-compose
           - git
+          - gvfs-goa # google drive in gnome-files
+          - gvfs-smb
           - htop
           - inxi
           - mc
+          - pass
           - python3-pip
           - sshpass
           - tmux
@@ -104,9 +155,22 @@
     - name: dnf - gui
       dnf:
         name:
+          - digikam # why not flatpak = https://github.com/flathub/org.kde.digikam/issues/17
+          - eog
+          - file-roller
+          - file-roller-nautilus
           - firefox
           - flatpak
+          - foot
+          - gnome-control-center
+          - gnome-online-accounts
+          - gnome-system-log
+          - gnome-system-monitor
           - mpv
+          - nautilus
+          - peek
+          - raw-thumbnailer
+          - seahorse
           - steam-devices
           - yubikey-manager
         state: latest
@@ -137,12 +201,15 @@
       with_items:
         - com.discordapp.Discord
         - com.github.tchx84.Flatseal
+        - com.github.wwmm.easyeffects
         - com.gitlab.newsflash
+        - com.jgraph.drawio.desktop
         - com.prusa3d.PrusaSlicer
         - com.rawtherapee.RawTherapee
         - com.sweethome3d.Sweethome3d
         - com.valvesoftware.Steam
         - com.visualstudio.code
+        - io.dbeaver.DBeaverCommunity
         - net.scribus.Scribus
         - org.chromium.Chromium
         - org.filmulator.Filmulator
