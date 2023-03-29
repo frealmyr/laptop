@@ -50,6 +50,7 @@
       dnf:
         name:
           - fprintd-pam
+          - git-credential-libsecret
           - gnome-keyring-pam
           - lxqt-policykit
           - pinentry-gnome3
@@ -63,6 +64,12 @@
         - libva
         - libva-utils
         - mesa-dri-drivers
+
+    - name: dnf - swap mesa driver to freeworld
+      shell: dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld && dnf swap -y mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
+      register: mesa_drivers_swap
+    - debug:
+        msg: "{{ mesa_drivers_swap.stdout }}"
 
     - name: dnf - audio/video
       dnf:
@@ -113,7 +120,6 @@
       dnf:
         name:
           - grim
-          - kanshi
           - qt5-qtgraphicaleffects # sddm theme
           - qt5-qtquickcontrols
           - sddm

@@ -106,9 +106,9 @@
       command: sudo flatpak override --env=GTK_THEME=Dracula
       become_user: fredrick
 
-    #############
-    ## Systemd ##
-    #############
+    ############################
+    ## Systemd / PAM / Agents ##
+    ############################
 
     # gnome-keyring-daemon
     # auto-login on session with ssh key support
@@ -126,14 +126,14 @@
 
     - name: systemd - enable ssh on gnome-keyring-daemon.service
       ansible.builtin.replace:
-        path: /usr/lib/systemd/user/gnome-keyring-daemon.service
+        path: /home/fredrick/.config/systemd/user/gnome-keyring-daemon.service
         regexp: '"pkcs11,secrets"'
         replace: '"pkcs11,secrets,ssh"'
 
     - name: systemd - override gnome-keyring service with pkcsl,ssh,secret components
       ansible.builtin.systemd:
         name: gnome-keyring-daemon
-        state: started
+        state: restarted
         scope: user
         enabled: true
         daemon_reload: true
@@ -179,6 +179,42 @@
         state: started
         scope: user
         enabled: true
+        daemon_reload: true
+      become_user: fredrick
+
+    - name: systemd - create ssh-agent service
+      copy:
+        dest: $HOME/.config/systemd/user/ssh-agent.service
+        content: "{{ content }}"
+      vars:
+        content: |
+          [Unit]
+          Description=SSH key agent
+
+          [Service]
+          Type=simple
+          Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket
+          ExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK
+
+          [Install]
+          WantedBy=default.target
+      become_user: fredrick
+
+    - name: systemd - enable and start ssh-agent service
+      ansible.builtin.systemd:
+        name: ssh-agent.service
+        state: stopped
+        scope: user
+        enabled: false
+        daemon_reload: true
+      become_user: fredrick
+
+    - name: systemd - enable and start ssh-agent service
+      ansible.builtin.systemd:
+        name: ssh-agent.socket
+        state: stopped
+        scope: user
+        enabled: false
         daemon_reload: true
       become_user: fredrick
 
