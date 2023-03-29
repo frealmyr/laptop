@@ -137,7 +137,6 @@
         name:
           - bat
           - curl
-          - docker-compose
           - git
           - gvfs-goa # google drive in gnome-files
           - gvfs-smb
@@ -261,4 +260,8 @@
       register: asdf_add_result
       failed_when:
         - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
+      become_user: fredrick
+
+    - name: asdf - configure direnv
+      shell: asdf direnv setup --shell zsh --version latest
       become_user: fredrick

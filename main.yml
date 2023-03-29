@@ -2,6 +2,7 @@
 - hosts: localhost
   become: true
 
-- import_playbook: playbooks/packages.yml
-- import_playbook: playbooks/configure.yml
-- import_playbook: playbooks/dotfiles.yml
+- import_playbook: playbooks/1-packages.yml
+- import_playbook: playbooks/2-configure.yml
+- import_playbook: playbooks/3-dotfiles.yml
+- import_playbook: playbooks/4-firefox.yml

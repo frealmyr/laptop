@@ -10,20 +10,20 @@
     - name: set zsh as default shell
       shell: chsh -s $(which zsh) fredrick
 
-    ############
-    ## Laptop ##
-    ############
+    ###########
+    ## Power ##
+    ###########
 
     # Enable GuC, and HuC
     # Disable GVT-g virtualization as it is incompatible with GuC
     # https://ask.fedoraproject.org/t/intel-graphics-best-practices-and-settings-for-hardware-acceleration/21119
 
-    - name: gpu - check if intel driver is used
-      shell: dnf list installed | grep intel-media-driver
+    - name: gpu - check cpu info
+      shell: grep -m 1 'model name' /proc/cpuinfo | grep Intel
       ignore_errors: True
       check_mode: False
       changed_when: False
-      register: intel_driver_installed
+      register: intel_gpu_gen9
 
     - name: gpu - enable i915 features
       ansible.builtin.blockinfile:
@@ -32,11 +32,17 @@
           options i915 enable_guc=3
           options i915 enable_fbc=1
         create: yes
-      when: intel_driver_installed.rc == 0
+      when: intel_gpu_gen9.rc == 0
 
     - name: i915 - rebuild intramfs
       command: dracut --force
-      when: intel_driver_installed.rc == 0
+      when: intel_gpu_gen9.rc == 0
+
+    - name: systemd - enable tuned service
+      ansible.builtin.systemd:
+        name: tuned
+        state: started
+        enabled: true
 
     #################
     ## UI & Themes ##
@@ -56,10 +62,17 @@
         src: ./files/sddm/themes/chili
         dest: /usr/share/sddm/themes
 
+    - name: sddm - create etc directory
+      file:
+        path: /etc/sddm.conf.d
+        state: directory
+
     - name: sddm - override theme directory, override current theme
-      ansible.builtin.blockinfile:
-        path: /etc/sddm.conf.d/theme.conf
-        block: |
+      copy:
+        dest: /etc/sddm.conf.d/theme.conf
+        content: "{{ content }}"
+      vars:
+        content: |
           [Theme]
           ThemeDir=/usr/share/sddm/themes
           Current=chili
@@ -67,8 +80,23 @@
     - name: git - download dracula gnome gtk theme
       ansible.builtin.git:
         repo: "https://github.com/dracula/gtk.git"
-        dest: /usr/share/themes/dracula
+        dest: $HOME/.themes/dracula
         update: true
+      become_user: fredrick
+
+    - name: dconf - use dracula as gnome gtk theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/gtk-theme"
+        value: "'dracula'"
+        state: present
+      become_user: fredrick
+
+    - name: dconf - use papirus as gnome icon theme
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/icon-theme"
+        value: "'Papirus'"
+        state: present
+      become_user: fredrick
 
     - name: flatpak - allow themes folder in home
       command: sudo flatpak override --filesystem=$HOME/.themes
@@ -145,9 +173,30 @@
         module_arguments: 'auto_start'
         state: after
 
-    ############
-    ## Docker ##
-    ############
+    - name: systemd - enable gpg-agent user service
+      ansible.builtin.systemd:
+        name: gpg-agent.socket
+        state: started
+        scope: user
+        enabled: true
+        daemon_reload: true
+      become_user: fredrick
+
+    ################
+    ## Containers ##
+    ################
+
+    - name: kubectl - create .kube directory
+      file:
+        path: $HOME/.kube
+        state: directory
+      become_user: fredrick
+
+    - name: kubectl - touch config file
+      file:
+        path: $HOME/.kube/config
+        state: touch
+      become_user: fredrick
 
     # - name: docker - add user to docker group
     #   user: name=fredrick
