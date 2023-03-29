@@ -34,6 +34,7 @@
         state: enabled
       with_items:
         - erikreider/SwayNotificationCenter
+        - ycollet/audinux # for sonobus
 
     - name: dnf - system
       dnf:
@@ -167,6 +168,7 @@
           - gnome-system-log
           - gnome-system-monitor
           - mpv
+          - sonobus
           - nautilus
           - peek
           - raw-thumbnailer
