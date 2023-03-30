@@ -66,7 +66,7 @@
         - mesa-dri-drivers
 
     - name: dnf - swap mesa driver to freeworld
-      shell: dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld && dnf swap -y mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
+      shell: dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld --allowerasing && dnf swap -y mesa-vdpau-drivers mesa-vdpau-drivers-freeworld --allowerasing
       register: mesa_drivers_swap
     - debug:
         msg: "{{ mesa_drivers_swap.stdout }}"
