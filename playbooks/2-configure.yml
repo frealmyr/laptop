@@ -84,20 +84,6 @@
         update: true
       become_user: fredrick
 
-    - name: dconf - use dracula as gnome gtk theme
-      community.general.dconf:
-        key: "/org/gnome/desktop/interface/gtk-theme"
-        value: "'dracula'"
-        state: present
-      become_user: fredrick
-
-    - name: dconf - use papirus as gnome icon theme
-      community.general.dconf:
-        key: "/org/gnome/desktop/interface/icon-theme"
-        value: "'Papirus'"
-        state: present
-      become_user: fredrick
-
     - name: flatpak - allow themes folder in home
       command: sudo flatpak override --filesystem=$HOME/.themes
       become_user: fredrick
@@ -249,3 +235,28 @@
     #     - docker.socket
     #     - docker.service
     #     - containerd.service
+
+    #############
+    ## Flatpak ##
+    #############
+
+    # Make VSCode use Wayland
+    ## https://github.com/flatpak/flatpak/issues/2913#issuecomment-915384026
+    - name: flatpak - copy vscode .desktop to home folder
+      copy:
+        src: "{{ lookup('env','HOME') }}/.local/share/flatpak/exports/share/applications/{{ item }}"
+        dest: "{{ lookup('env','HOME') }}/.local/share/applications/{{ item }}"
+      with_items:
+        - com.visualstudio.code.desktop
+        - com.visualstudio.code-url-handler.desktop
+      become_user: fredrick
+
+    - name: flatpak - append wayland parameters to .desktop shortcuts
+      ansible.builtin.replace:
+        path: "{{ lookup('env','HOME') }}/.local/share/applications/{{ item }}"
+        regexp: '--file-forwarding com.visualstudio.code'
+        replace: '--file-forwarding com.visualstudio.code --enable-features=UseOzonePlatform --ozone-platform=wayland'
+      with_items:
+        - com.visualstudio.code.desktop
+        - com.visualstudio.code-url-handler.desktop
+      become_user: fredrick

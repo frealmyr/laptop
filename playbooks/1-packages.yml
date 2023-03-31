@@ -34,7 +34,6 @@
         state: enabled
       with_items:
         - erikreider/SwayNotificationCenter
-        - ycollet/audinux # for sonobus
 
     - name: dnf - system
       dnf:
@@ -120,6 +119,7 @@
       dnf:
         name:
           - grim
+          - kanshi
           - qt5-qtgraphicaleffects # sddm theme
           - qt5-qtquickcontrols
           - sddm
@@ -131,6 +131,7 @@
           - SwayNotificationCenter
           - waybar
           - wdisplays
+          - wev
           - wl-clipboard
           - wlsunset
           - wofi
@@ -220,6 +221,7 @@
         - com.visualstudio.code
         - io.dbeaver.DBeaverCommunity
         - net.scribus.Scribus
+        - net.sonobus.SonoBus
         - org.chromium.Chromium
         - org.filmulator.Filmulator
         - org.kde.digikam
@@ -269,5 +271,5 @@
       become_user: fredrick
 
     - name: asdf - configure direnv
-      shell: asdf direnv setup --shell zsh --version latest
+      shell: ~/.asdf/bin/asdf direnv setup --shell zsh --version latest
       become_user: fredrick

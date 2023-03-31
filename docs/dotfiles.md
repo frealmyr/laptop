@@ -40,5 +40,5 @@ dotfiles push origin wayland/sway
 > Ansible playbooks configures my dotfiles with https by default. Due to my new ssh key is not present in github during setup.
 
 ```bash
-dotfiles remote set-url origin git@github.com:frealmyr/dotfiles-configs.git
+dotfiles remote set-url origin git@github.com:frealmyr/dotfiles.git
 ```
