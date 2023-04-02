@@ -140,7 +140,7 @@
           - wev
           - wl-clipboard
           - wlsunset
-          - wofi
+          - rofi-wayland
           - xdg-desktop-portal-gtk
           - xdg-desktop-portal-wlr
           - xorg-x11-server-Xwayland
