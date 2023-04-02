@@ -6,6 +6,12 @@
     ## RPM Packages ##
     ##################
 
+    - name: dnf remove packages
+      dnf:
+        name:
+          - power-profiles-daemon
+        state: absent
+
     - name: dnf - upgrade latest
       dnf:
         name: "*"
