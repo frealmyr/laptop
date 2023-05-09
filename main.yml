@@ -5,4 +5,4 @@
 - import_playbook: playbooks/1-packages.yml
 - import_playbook: playbooks/2-configure.yml
 - import_playbook: playbooks/3-dotfiles.yml
-- import_playbook: playbooks/4-firefox.yml
+# - import_playbook: playbooks/4-firefox.yml
