@@ -120,6 +120,8 @@
       dnf:
         name:
         - '@Fonts'
+        - fira-code-fonts
+        - msimonson-anonymouspro-fonts
 
     - name: dnf - sway
       dnf:
@@ -253,9 +255,11 @@
       args:
         executable: /usr/bin/zsh
       with_items:
+        - air
         - argo
         - argo-rollouts
         - argocd
+        - awscli
         - direnv
         - gcloud
         - github-cli

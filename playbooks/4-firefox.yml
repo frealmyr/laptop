@@ -7,6 +7,7 @@
     profiles:
       - Personal
       - Sonat
+      - TV2
   tasks:
     - name: firefox - check existing profiles
       stat:
