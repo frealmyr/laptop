@@ -1,6 +1,9 @@
 ---
 - hosts: localhost
   become: true
+  vars:
+    local_user: fredrick
+
   tasks:
     ##########
     ## Brew ##
@@ -18,10 +21,34 @@
     - name: brew - cli tools
       homebrew:
         name:
-          - bat
+          # - awscli
+          - coreutils
+          - curl
+          - ed
+          - findutils
+          - gawk
+          - git
+          - gnu-sed
+          - gnu-tar
+          - grep
+          - koekeishiya/formulae/skhd
+          - koekeishiya/formulae/yabai
+          - make
+          - parallel
           - tmux
           - zsh
         state: present
+      become_user: "{{ local_user }}"
+
+    - name: brew - gui tools
+      homebrew_cask:
+        name:
+          - alacritty
+          - discord
+          - spaceid
+          - slack
+        state: present
+      become_user: "{{ local_user }}"
 
     ##########
     ## asdf ##
@@ -34,38 +61,42 @@
         version: v0.11.3
         update: no
         accept_hostkey: yes
-      become_user: fredrick
+      become_user: "{{ local_user }}"
 
     - name: asdf - add, install and set global versions
       shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}" && asdf install "{{ item }}" latest && asdf global "{{ item }}" latest
-      args:
-        executable: /usr/bin/zsh
-      with_items:
+      loop:
         - air
         - argo
         - argo-rollouts
         - argocd
         - awscli
+        - bat
         - direnv
         - gcloud
-        - github-cli
         - golang
         - helm
         - istioctl
+        - jq
         - kompose
         - krew
         - kubectl
         - operator-sdk
         - pulumi
+        - python
+        - sops
         - stern
         - terraform
         - terraform-docs
         - yq
+        # - github-cli # no arm64
       register: asdf_add_result
       failed_when:
         - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
-      become_user: fredrick
+      become_user: "{{ local_user }}"
 
     - name: asdf - configure direnv
-      shell: ~/.asdf/bin/asdf direnv setup --shell zsh --version latest
-      become_user: fredrick
+      shell: asdf direnv setup --shell zsh --version latest
+      args:
+        executable: /bin/zsh
+      become_user: "{{ local_user }}"

@@ -3,6 +3,12 @@
   become: true
 
   tasks:
+    ###########
+    ## Shell ##
+    ###########
+
+    - name: shell - brew provided zsh as default shell
+      shell: chsh -s /bin/zsh fredrick
 
     ################
     ## Containers ##

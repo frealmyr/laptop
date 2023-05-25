@@ -3,7 +3,7 @@
   become: true
   become_user: fredrick
   vars:
-    profiles_dir: /home/fredrick/.mozilla/firefox
+    profiles_dir: /Users/fredrick/Library/Application Support/Firefox
     profiles:
       - Personal
       - Sonat
@@ -20,7 +20,7 @@
         missing_profiles: "{{ dir_to_check.results | selectattr('stat.exists','==',false) | map(attribute='item') | list }}"
 
     - name: firefox - generate missing profiles
-      command: firefox -CreateProfile "{{ item }} {{ profiles_dir }}/{{ item }}"
+      shell: /Applications/Firefox.app/Contents/MacOS/firefox -CreateProfile "{{ item }} {{ profiles_dir }}/{{ item }}"
       with_items: "{{ missing_profiles }}"
 
     - name: firefox - create chrome folder
@@ -39,6 +39,6 @@
 
     - name: firefox - disable start last profile
       lineinfile:
-        path: ~/.mozilla/firefox/profiles.ini
+        path: /Users/fredrick/Library/Application Support/Firefox/profiles.ini
         regexp: '^StartWithLastProfile=.*'
         line: StartWithLastProfile=0
