@@ -2,9 +2,7 @@
 
 I strive to keep all configuration for my workstation as code.
 
-This repository contains Ansible playbooks for configuring my Thinkpad X1 Carbon Gen9, which also [configure my dotfiles as a bare git repository.](dotfiles.md)
-
-![screenshot-2023-02-16-11-27-02](https://user-images.githubusercontent.com/29174850/219339716-9441e209-5aa5-4f43-92b3-8a19210ab77f.png)
+This repository contains Ansible playbooks for configuring my Macbook Pro, which also [configure my dotfiles as a bare git repository.](dotfiles.md)
 
 ### Fresh install
 
