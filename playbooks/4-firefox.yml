@@ -6,8 +6,8 @@
     profiles_dir: /Users/fredrick/Library/Application Support/Firefox
     profiles:
       - Personal
-      - Sonat
-      - TV2
+      # - Sonat
+      # - TV2
   tasks:
     - name: firefox - check existing profiles
       stat:
@@ -37,8 +37,8 @@
       copy: src=files/firefox/user.js dest={{ profiles_dir }}/{{ item }}
       with_items: "{{ missing_profiles }}"
 
-    - name: firefox - disable start last profile
-      lineinfile:
-        path: /Users/fredrick/Library/Application Support/Firefox/profiles.ini
-        regexp: '^StartWithLastProfile=.*'
-        line: StartWithLastProfile=0
+    # - name: firefox - disable start last profile
+    #   lineinfile:
+    #     path: /Users/fredrick/Library/Application Support/Firefox/profiles.ini
+    #     regexp: '^StartWithLastProfile=.*'
+    #     line: StartWithLastProfile=0

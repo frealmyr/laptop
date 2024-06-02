@@ -1,30 +1,231 @@
 ---
 - hosts: localhost
   become: true
+  vars:
+    local_user: fredrick
 
   tasks:
-    ###########
-    ## Shell ##
-    ###########
+    # ###########
+    # ## Shell ##
+    # ###########
 
-    - name: shell - brew provided zsh as default shell
-      shell: chsh -s /bin/zsh fredrick
+    # - name: shell - brew provided zsh as default shell
+    #   shell: chsh -s /bin/zsh fredrick
+
+    # ##############
+    # ## Services ##
+    # ##############
+
+    # - name: services - enable & start
+    #   shell: "{{ item }}"
+    #   with_items:
+    #     - "yabai --start-service"
+    #     - "skhd --start-service"
+    #   become_user: "{{ local_user }}"
+
+    ##################
+    ## OSX Defaults ##
+    ##################
+
+    - name: osx - quit system preferences
+      shell: osascript -e 'tell application "System Preferences" to quit'
+      become_user: "{{ local_user }}"
+    
+    - name: osx - disable boot sound effects
+      shell: nvram SystemAudioVolume=" "
+
+    - name: osx - NSGlobalDomain
+      shell: "defaults write NSGlobalDomain {{ item.key }} -{{ item.type }} {{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        # Animations
+        - { key: "NSAutomaticWindowAnimationsEnabled", type: "bool", value: false } # Disable open/close animations for windows/popovers
+        - { key: "NSUseAnimatedFocusRing", type: "bool", value: false }
+        - { key: "com.apple.springing.enabled", type: "bool", value: true }
+        - { key: "com.apple.springing.delay", type: "float", value: 0 }
+        # Display
+        - { key: "AppleFontSmoothing", type: "int", value: 0 } # disable subpixel-rendering, more accurate and less bold fonts. Better for "non-retina" displays, as it does not blur pixels.
+        # Input
+        - { key: "ApplePressAndHoldEnabled", type: "bool", value: false }
+        - { key: "InitialKeyRepeat", type: "int", value: 15 }
+        - { key: "KeyRepeat", type: "int", value: 3 }
+        - { key: "AppleKeyboardUIMod", type: "int", value: 3 } # use keyboard for all things ui, e.g. use tab in modal dialogs
+        - { key: "NSAutomaticCapitalizationEnabled", type: "bool", value: false }
+        - { key: "NSAutomaticDashSubstitutionEnabled", type: "bool", value: false }
+        - { key: "NSAutomaticPeriodSubstitutionEnabled", type: "bool", value: false }
+        - { key: "NSAutomaticQuoteSubstitutionEnabled", type: "bool", value: false }
+        - { key: "NSAutomaticSpellingCorrectionEnabled", type: "bool", value: false }
+        # GUI
+        - { key: "AppleShowAllExtensions", type: "bool", value: true }
+        - { key: "AppleShowAllFiles", type: "bool", value: true }
+        - { key: "AppleShowScrollBars", type: "string", value: "Always" }
+        - { key: "NSTableViewDefaultSizeMode", type: "int", value: 2 } # sidebar medium icon size
+        - { key: "NSNavPanelExpandedStateForSaveMode", type: "bool", value: true }
+        - { key: "NSNavPanelExpandedStateForSaveMode2", type: "bool", value: true }
+        - { key: "AppleHighlightColor", type: "string", value: '"0.968627 0.831373 1.000000 Purple"' }
+        - { key: "NSStatusItemSpacing", type: "int", value: 8 } # Menu bar item padding
+
+    - name: osx - screensaver
+      community.general.osx_defaults:
+        domain: com.apple.screensaver
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "askForPassword", type: "int", value: 1 }
+        - { key: "askForPasswordDelay", type: "int", value: 0 }
+
+    - name: osx - screencapture
+      community.general.osx_defaults:
+        domain: com.apple.screencapture
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "location", type: "string", value: "${HOME}/Desktop" }
+        - { key: "type", type: "string", value: "png" }
+        - { key: "disable-shadow", type: "bool", value: true }
+
+    - name: osx - universalaccess
+      community.general.osx_defaults:
+        domain: com.apple.universalaccess
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "increaseContrast", type: "bool", value: true }
+        - { key: "reduceTransparency", type: "bool", value: true }
+        - { key: "reduceMotion", type: "bool", value: true }
+
+    - name: osx - desktopservices
+      community.general.osx_defaults:
+        domain: com.apple.desktopservices
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "DSDontWriteNetworkStores", type: "bool", value: true }
+        - { key: "DSDontWriteUSBStores", type: "bool", value: true }
+
+    - name: osx - imagecapture
+      community.general.osx_defaults:
+        domain: com.apple.ImageCapture
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "disableHotPlug", type: "bool", value: true } # prevent photos popup on plugging in devices
+
+    - name: osx - timemachine
+      community.general.osx_defaults:
+        domain: com.apple.TimeMachine
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "DoNotOfferNewDisksForBackup", type: "bool", value: true } # disable prompt for new hard drives as backup volume
+
+    - name: osx - mail
+      community.general.osx_defaults:
+        domain: com.apple.mail
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "AddressesIncludeNameOnPasteboard", type: "bool", value: false } # copy addresses as `foo@example.com` instead of `Foo Bar <foo@example.com>`
+
+    - name: osx - dashboard
+      community.general.osx_defaults:
+        domain: com.apple.dashboard
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "mcx-disabled", type: "bool", value: true } # disable dashboard for some more ram
+
+    - name: osx - finder
+      community.general.osx_defaults:
+        domain: com.apple.finder
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "QuitMenuItem", type: "bool", value: true } # allow quitting via ⌘ + Q
+        - { key: "NewWindowTarget", type: "string", value: "PfDe" }
+        - { key: "NewWindowTargetPath", type: "string", value: "file://${HOME}/" }
+        # GUI
+        - { key: "DisableAllAnimations", type: "bool", value: true }
+        - { key: "ShowPathbar", type: "bool", value: true }
+        - { key: "howStatusBar", type: "bool", value: true }
+        - { key: "_FXShowPosixPathInTitle", type: "bool", value: true }
+        - { key: "_FXSortFoldersFirst", type: "bool", value: true }
+        - { key: "FXDefaultSearchScope", type: "string", value: "SCcf" } # search folder by default
+        - { key: "FXEnableExtensionChangeWarning", type: "bool", value: false }
+        - { key: "FXPreferredViewStyle", type: "string", value: "Nlsv" } # list view by default
+        - { key: "WarnOnEmptyTrash", type: "bool", value: false }
+        # Desktop Icons
+        - { key: "ShowExternalHardDrivesOnDesktop", type: "bool", value: false }
+        - { key: "ShowHardDrivesOnDesktop", type: "bool", value: false }
+        - { key: "ShowMountedServersOnDesktop", type: "bool", value: false }
+        - { key: "ShowRemovableMediaOnDesktop", type: "bool", value: false }
+
+    - name: osx - dock
+      community.general.osx_defaults:
+        domain: com.apple.dock
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "autohide", type: "bool", value: "true" }
+        - { key: "autohide-delay", type: "float", value: 0.0 }
+        - { key: "autohide-time-modifier", type: "float", value: 0.0 }
+        - { key: "expose-animation-duration", type: "float", value: 0.0 } # open mission control animation
+        - { key: "tilesize", type: "float", value: 48 }
+        - { key: "static-only", type: "bool", value: true } # only display apps that are currently running
+        - { key: "show-process-indicators", type: "bool", value: false } # no need when using static-only
+        - { key: "mru-spaces", type: "bool", value: false } # do not reorder Spaces based on recent use
+        - { key: "wvous-tr-corner", type: "int", value: 0 } # disable hot corner
+        - { key: "wvous-tl-corner", type: "int", value: 0 } # disable hot corner
+        - { key: "wvous-br-corner", type: "int", value: 0 } # disable hot corner
+        - { key: "wvous-bl-corner", type: "int", value: 0 } # disable hot corner
+
+    - name: osx - restart dock
+      shell: /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u && killall Dock
+
+    - name: osx - prompt for restart GUI server
+      pause:
+        prompt: "Do you want to restart the WindowServer and logout? (yes/no)"
+      register: prompt
+
+    - name: osx - restart window server
+      shell: killall -HUP WindowServer
+      when: '"yes" in prompt.user_input'
 
     ################
     ## Containers ##
     ################
 
-    - name: kubectl - create .kube directory
-      file:
-        path: $HOME/.kube
-        state: directory
-      become_user: fredrick
+    # - name: kubectl - create .kube directory
+    #   file:
+    #     path: $HOME/.kube
+    #     state: directory
+    #   become_user: fredrick
 
-    - name: kubectl - touch config file
-      file:
-        path: $HOME/.kube/config
-        state: touch
-      become_user: fredrick
+    # - name: kubectl - touch config file
+    #   file:
+    #     path: $HOME/.kube/config
+    #     state: touch
+    #   become_user: fredrick
 
     # - name: docker - add user to docker group
     #   user: name=fredrick
