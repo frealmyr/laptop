@@ -5,123 +5,124 @@
     local_user: fredrick
 
   tasks:
-    # ##########
-    # ## Brew ##
-    # ##########
+    ##########
+    ## Brew ##
+    ##########
 
-    # - name: shell - check if brew is present
-    #   command: brew -v
-    #   register: brew_present
-    #   ignore_errors: true
+    - name: shell - check if brew is present
+      command: brew -v
+      register: brew_present
+      ignore_errors: true
 
-    # - name: shell - install brew
-    #   shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    #   when: brew_present is failed
+    - name: shell - install brew
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      when: brew_present is failed
 
-    # - name: brew - tap
-    #   homebrew_tap:
-    #     name:
-    #       - koekeishiya/formulae # provides: yabai, skhd
-    #   become_user: "{{ local_user }}"
+    - name: brew - tap
+      homebrew_tap:
+        name:
+          - koekeishiya/formulae # provides: yabai, skhd
+      become_user: "{{ local_user }}"
 
-    # - name: brew - cli tools
-    #   homebrew:
-    #     name:
-    #       - bat
-    #       - coreutils
-    #       - curl
-    #       - direnv
-    #       - ed
-    #       - findutils
-    #       - fzf
-    #       - gawk
-    #       - git
-    #       - gnu-sed
-    #       - gnu-tar
-    #       - gnupg
-    #       - grep
-    #       - htop
-    #       - jq
-    #       - less
-    #       - make
-    #       - make
-    #       - neofetch
-    #       - neovim
-    #       - parallel
-    #       - pinentry-mac # required for gnupg on macos
-    #       - skhd
-    #       - tmux
-    #       - tree
-    #       - vim
-    #       - wget
-    #       - xz
-    #       - yabai
-    #       - yq
-    #       - zsh
-    #     state: present
-    #   become_user: "{{ local_user }}"
+    - name: brew - cli tools
+      homebrew:
+        name:
+          - bat
+          - coreutils
+          - cormacrelf/tap/dark-notify # light/dark theme events to neovim/alacritty
+          - curl
+          - direnv
+          - ed
+          - findutils
+          - fzf
+          - gawk
+          - git
+          - gnu-sed
+          - gnu-tar
+          - gnupg
+          - grep
+          - htop
+          - jq
+          - less
+          - make
+          - make
+          - neofetch
+          - neovim
+          - parallel
+          - pinentry-mac # required for gnupg on macos
+          - skhd
+          - tmux
+          - tree
+          - vim
+          - wget
+          - xz
+          - yabai
+          - yq
+          - zsh
+        state: present
+      become_user: "{{ local_user }}"
 
-    # - name: brew - casks gui tools
-    #   homebrew_cask:
-    #     name:
-    #       - alacritty
-    #       - discord
-    #       - firefox
-    #       - moonlight
-    #       - netnewswire
-    #       - obs
-    #       - prusaslicer
-    #       - spaceid
-    #       - sweet-home3d
-    #       - tailscale
-    #       - visual-studio-code
-    #       - steam
-    #     state: present
-    #     install_options: force
-    #   become_user: "{{ local_user }}"
+    - name: brew - casks gui tools
+      homebrew_cask:
+        name:
+          - alacritty
+          - discord
+          - firefox
+          - moonlight
+          - netnewswire
+          - obs
+          - prusaslicer
+          - spaceid
+          - sweet-home3d
+          - tailscale
+          - visual-studio-code
+          - steam
+        state: present
+        install_options: force
+      become_user: "{{ local_user }}"
 
-    # ##########
-    # ## asdf ##
-    # ##########
+    ##########
+    ## asdf ##
+    ##########
 
-    # - name: asdf - clone asdf repository
-    #   git:
-    #     repo: "https://github.com/asdf-vm/asdf.git"
-    #     dest: "~/.asdf"
-    #     version: v0.14.0
-    #     update: no
-    #     accept_hostkey: yes
-    #   become_user: "{{ local_user }}"
+    - name: asdf - clone asdf repository
+      git:
+        repo: "https://github.com/asdf-vm/asdf.git"
+        dest: "~/.asdf"
+        version: v0.14.0
+        update: no
+        accept_hostkey: yes
+      become_user: "{{ local_user }}"
 
-    # - name: asdf - add, install and set global versions
-    #   shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}" && asdf install "{{ item }}" latest && asdf global "{{ item }}" latest
-    #   loop:
-    #     - air
-    #     - argo
-    #     - argo-rollouts
-    #     - argocd
-    #     - awscli
-    #     - cilium-cli
-    #     - gcloud
-    #     - github-cli
-    #     - golang
-    #     - helm
-    #     - istioctl
-    #     - kompose
-    #     - krew
-    #     - kubectl
-    #     - kubelogin
-    #     - operator-sdk
-    #     - pulumi
-    #     - python
-    #     - sops
-    #     - stern
-    #     - terraform
-    #     - terraform-docs
-    #   register: asdf_add_result
-    #   failed_when:
-    #     - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
-    #   become_user: "{{ local_user }}"
+    - name: asdf - add, install and set global versions
+      shell: . $HOME/.asdf/asdf.sh && asdf plugin add "{{ item }}" && asdf install "{{ item }}" latest && asdf global "{{ item }}" latest
+      loop:
+        - air
+        - argo
+        - argo-rollouts
+        - argocd
+        - awscli
+        - cilium-cli
+        - gcloud
+        - github-cli
+        - golang
+        - helm
+        - istioctl
+        - kompose
+        - krew
+        - kubectl
+        - kubelogin
+        - operator-sdk
+        - pulumi
+        - python
+        - sops
+        - stern
+        - terraform
+        - terraform-docs
+      register: asdf_add_result
+      failed_when:
+        - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
+      become_user: "{{ local_user }}"
 
     ############
     ## Custom ##
