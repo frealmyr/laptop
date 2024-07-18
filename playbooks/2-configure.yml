@@ -5,23 +5,35 @@
     local_user: fredrick
 
   tasks:
-    # ###########
-    # ## Shell ##
-    # ###########
+    ###########
+    ## Shell ##
+    ###########
 
-    # - name: shell - brew provided zsh as default shell
-    #   shell: chsh -s /bin/zsh fredrick
+    - name: shell - brew provided zsh as default shell
+      shell: chsh -s /bin/zsh fredrick
 
-    # ##############
-    # ## Services ##
-    # ##############
+    ##############
+    ## Services ##
+    ##############
 
-    # - name: services - enable & start
-    #   shell: "{{ item }}"
-    #   with_items:
-    #     - "yabai --start-service"
-    #     - "skhd --start-service"
-    #   become_user: "{{ local_user }}"
+    - name: services - enable & start
+      shell: "{{ item }}"
+      with_items:
+        - "yabai --start-service"
+        - "skhd --start-service"
+        - "brew services start sleepwatcher"
+      become_user: "{{ local_user }}"
+
+    - name: homebrew - check if autoupdate is already enabled
+      command: brew autoupdate status
+      register: autoupdate_status
+      ignore_errors: yes  # In case Homebrew or the autoupdate command is not available
+      become_user: "{{ local_user }}"
+
+    - name: homebrew - enable autoupgrade
+      command: brew autoupdate start 604800 --upgrade --cleanup --immediate --sudo
+      when: "'Autoupdate is not configured.' in autoupdate_status.stdout"
+      become_user: "{{ local_user }}"
 
     ##################
     ## OSX Defaults ##
@@ -30,12 +42,16 @@
     - name: osx - quit system preferences
       shell: osascript -e 'tell application "System Preferences" to quit'
       become_user: "{{ local_user }}"
-    
+
     - name: osx - disable boot sound effects
       shell: nvram SystemAudioVolume=" "
 
     - name: osx - NSGlobalDomain
-      shell: "defaults write NSGlobalDomain {{ item.key }} -{{ item.type }} {{ item.value }}"
+      community.general.osx_defaults:
+        domain: NSGlobalDomain
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
       become_user: "{{ local_user }}"
       with_items:
         # Animations
@@ -45,7 +61,10 @@
         - { key: "com.apple.springing.delay", type: "float", value: 0 }
         # Display
         - { key: "AppleFontSmoothing", type: "int", value: 0 } # disable subpixel-rendering, more accurate and less bold fonts. Better for "non-retina" displays, as it does not blur pixels.
+        # Sound
+        - { key: "com.apple.sound.beep.flash", type: "int", value: 0 }
         # Input
+        - { key: "AppleMiniaturizeOnDoubleClick", type: "bool", value: false }
         - { key: "ApplePressAndHoldEnabled", type: "bool", value: false }
         - { key: "InitialKeyRepeat", type: "int", value: 15 }
         - { key: "KeyRepeat", type: "int", value: 3 }
@@ -56,13 +75,16 @@
         - { key: "NSAutomaticQuoteSubstitutionEnabled", type: "bool", value: false }
         - { key: "NSAutomaticSpellingCorrectionEnabled", type: "bool", value: false }
         # GUI
+        - { key: "AppleReduceDesktopTinting", type: "bool", value: true }
+        - { key: "AppleAccentColor", type: "int", value: 5 }
         - { key: "AppleShowAllExtensions", type: "bool", value: true }
         - { key: "AppleShowAllFiles", type: "bool", value: true }
         - { key: "AppleShowScrollBars", type: "string", value: "Always" }
-        - { key: "NSTableViewDefaultSizeMode", type: "int", value: 2 } # sidebar medium icon size
+        - { key: "AppleSpacesSwitchOnActivate", type: "bool", value: false }
+        - { key: "NSTableViewDefaultSizeMode", type: "int", value: 1 } # sidebar small icon size
         - { key: "NSNavPanelExpandedStateForSaveMode", type: "bool", value: true }
         - { key: "NSNavPanelExpandedStateForSaveMode2", type: "bool", value: true }
-        - { key: "AppleHighlightColor", type: "string", value: '"0.968627 0.831373 1.000000 Purple"' }
+        - { key: "AppleHighlightColor", type: "string", value: "0.968627 0.831373 1.000000 Purple" }
         - { key: "NSStatusItemSpacing", type: "int", value: 8 } # Menu bar item padding
 
     - name: osx - screensaver
@@ -76,6 +98,17 @@
         - { key: "askForPassword", type: "int", value: 1 }
         - { key: "askForPasswordDelay", type: "int", value: 0 }
 
+    - name: osx - menuextra
+      community.general.osx_defaults:
+        domain: com.apple.menuextra
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      become_user: "{{ local_user }}"
+      with_items:
+        - { key: "clock.DateFormat", type: "string", value: "dd.mm hh:mm" }
+        - { key: "battery", type: "string", value: "YES" } # wtf?
+
     - name: osx - screencapture
       community.general.osx_defaults:
         domain: com.apple.screencapture
@@ -87,6 +120,7 @@
         - { key: "location", type: "string", value: "${HOME}/Desktop" }
         - { key: "type", type: "string", value: "png" }
         - { key: "disable-shadow", type: "bool", value: true }
+        - { key: "target", type: "string", value: "clipboard" }
 
     - name: osx - universalaccess
       community.general.osx_defaults:
@@ -192,53 +226,21 @@
         - { key: "expose-animation-duration", type: "float", value: 0.0 } # open mission control animation
         - { key: "tilesize", type: "float", value: 48 }
         - { key: "static-only", type: "bool", value: true } # only display apps that are currently running
-        - { key: "show-process-indicators", type: "bool", value: false } # no need when using static-only
+        - { key: "show-process-indicators", type: "bool", value: true }
         - { key: "mru-spaces", type: "bool", value: false } # do not reorder Spaces based on recent use
         - { key: "wvous-tr-corner", type: "int", value: 0 } # disable hot corner
         - { key: "wvous-tl-corner", type: "int", value: 0 } # disable hot corner
         - { key: "wvous-br-corner", type: "int", value: 0 } # disable hot corner
         - { key: "wvous-bl-corner", type: "int", value: 0 } # disable hot corner
 
-    - name: osx - restart dock
-      shell: /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u && killall Dock
+    # - name: osx - restart dock
+    #   shell: /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u && killall Dock
 
-    - name: osx - prompt for restart GUI server
-      pause:
-        prompt: "Do you want to restart the WindowServer and logout? (yes/no)"
-      register: prompt
+    # - name: osx - prompt for restart GUI server
+    #   pause:
+    #     prompt: "Do you want to restart the WindowServer and logout? (yes/no)"
+    #   register: prompt
 
-    - name: osx - restart window server
-      shell: killall -HUP WindowServer
-      when: '"yes" in prompt.user_input'
-
-    ################
-    ## Containers ##
-    ################
-
-    # - name: kubectl - create .kube directory
-    #   file:
-    #     path: $HOME/.kube
-    #     state: directory
-    #   become_user: fredrick
-
-    # - name: kubectl - touch config file
-    #   file:
-    #     path: $HOME/.kube/config
-    #     state: touch
-    #   become_user: fredrick
-
-    # - name: docker - add user to docker group
-    #   user: name=fredrick
-    #     groups=docker
-    #     append=yes
-
-    # - name: docker - disable system services (for power savings)
-    #   ansible.builtin.systemd:
-    #     name: "{{ item }}"
-    #     enabled: no
-    #     masked: no
-    #   become_user: root
-    #   with_items:
-    #     - docker.socket
-    #     - docker.service
-    #     - containerd.service
+    # - name: osx - restart window server
+    #   shell: killall -HUP WindowServer
+    #   when: '"yes" in prompt.user_input'
