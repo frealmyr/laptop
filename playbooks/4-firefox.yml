@@ -6,8 +6,7 @@
     profiles_dir: /Users/fredrick/Library/Application Support/Firefox
     profiles:
       - Personal
-      # - Sonat
-      # - TV2
+      - DnB
   tasks:
     - name: firefox - check existing profiles
       stat:

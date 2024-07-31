@@ -33,8 +33,8 @@
           - bat
           - bclm
           - coreutils
-          - dark-notify # light/dark theme events to neovim/alacritty
           - curl
+          - dark-notify # light/dark theme events to neovim/alacritty
           - direnv
           - ed
           - findutils
@@ -55,6 +55,7 @@
           - parallel
           - pinentry-mac # required for gnupg on macos
           - skhd
+          - sleepwatcher
           - tmux
           - tree
           - vim
@@ -80,21 +81,18 @@
       homebrew_cask:
         name:
           - alacritty
+          - betterdisplay
           - discord
-          - bitwarden
           - firefox
+          - launchcontrol
           - moonlight
           - netnewswire
           - obs
           - prusaslicer
-          - spaceid
-          - sweet-home3d
-          - tailscale
-          - visual-studio-code
           - steam
-          - darktable
+          - tailscale
           - utm
-          - digikam
+          - visual-studio-code
         state: present
         install_options: force
       become_user: "{{ local_user }}"

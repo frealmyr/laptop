@@ -35,6 +35,13 @@
       when: "'Autoupdate is not configured.' in autoupdate_status.stdout"
       become_user: "{{ local_user }}"
 
+    ############
+    ## System ##
+    ############
+
+    - name: bclm - set max charge level to 80%
+      shell: bclm write 80 && bclm persist
+
     ##################
     ## OSX Defaults ##
     ##################
