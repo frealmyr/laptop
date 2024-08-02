@@ -42,6 +42,31 @@
     - name: bclm - set max charge level to 80%
       shell: bclm write 80 && bclm persist
 
+    ############
+    ## VSCode ##
+    ############
+
+    - name: vscode - copy extensions file to tmp
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - {
+            src: "./files/vscode/extensions.txt",
+            dest: "/tmp/extensions.txt",
+          }
+
+    - name: vscode - remove existing extensions
+      shell: code  --list-extensions | xargs -n 1 code --uninstall-extension
+      become_user: "{{ local_user }}"
+
+    - name: vscode - add extensions defined in file
+      shell: cat /tmp/extensions.txt | xargs -n 1 code --install-extension
+      become_user: "{{ local_user }}"
+
+    - name: vscode - remove tmp file
+      file:
+        path: /tmp/extensions.txt
+        state: absent
+
     ##################
     ## OSX Defaults ##
     ##################
